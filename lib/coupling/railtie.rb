@@ -1,0 +1,18 @@
+require 'coupling/helper'
+require 'coupling/rack/app'
+
+module Coupling
+  class Railtie < Rails::Railtie
+    initializer :add_helper do
+      ActiveSupport.on_load(:action_view) do
+        include Helper
+      end
+    end
+
+    config.after_initialize do |app|
+      app.routes.prepend do
+        mount Rack::App.new, at: Coupling.public_path
+      end
+    end
+  end
+end
