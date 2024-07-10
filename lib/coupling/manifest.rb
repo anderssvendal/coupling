@@ -15,7 +15,7 @@ module Coupling
     end
 
     def path_to(name)
-      "#{Coupling.public_path}/#{lookup(name)}"
+      "#{Coupling.config.public_path}/#{lookup(name)}"
     end
 
     def find(name)
@@ -40,15 +40,15 @@ module Coupling
     private
 
     def path
-      Coupling.build_dir.join('manifest.json')
+      Coupling.config.root.join('manifest.json')
     end
 
     def path_prefix
-      Coupling.build_dir.to_s.gsub(Rails.root.to_s, '').gsub(/^\//, '') + '/'
+      Coupling.config.root.to_s.gsub(Rails.root.to_s, '').gsub(/^\//, '') + '/'
     end
 
     def normalize_name(name)
-      name.gsub(/^#{Coupling.public_path}\/*/, '')
+      name.gsub(/^#{Coupling.config.public_path}\/*/, '')
     end
 
     def raise_asset_not_found(name)

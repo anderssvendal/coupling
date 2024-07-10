@@ -2,32 +2,32 @@ require "coupling/manifest"
 
 module Coupling
   module Helper
-    def esbuild_asset_path(name)
-      esbuild_manifest.path_to(name)
+    def coupled_asset_path(name)
+      coupled_manifest.path_to(name)
     end
 
-    def esbuild_stylesheet_link_tag(name)
+    def coupled_stylesheet_link_tag(name)
       name = "#{name}.css" unless name.ends_with?('.css')
 
-      tag(:link, href: esbuild_asset_path(name), rel: 'stylesheet')
+      tag(:link, href: coupled_asset_path(name), rel: 'stylesheet')
     end
 
-    def esbuild_javascript_include_tag(name)
+    def coupled_javascript_include_tag(name)
       name = "#{name}.js" unless name.ends_with?('.js')
 
-      content_tag('script', src: esbuild_asset_path(name)) { '' }
+      content_tag('script', src: coupled_asset_path(name)) { '' }
     end
 
-    def esbuild_image_tag(name)
-      image_tag(esbuild_asset_path(name))
+    def coupled_image_tag(name)
+      image_tag(coupled_asset_path(name))
     end
 
-    def esbuild_assets
-      esbuild_manifest.entries.keys
+    def coupled_assets
+      coupled_manifest.entries.keys
     end
 
-    def esbuild_manifest
-      @esbuild_manifest ||= Coupling::Manifest.new
+    def coupled_manifest
+      @coupled_manifest ||= Coupling::Manifest.new
     end
   end
 end

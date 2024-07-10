@@ -1,4 +1,3 @@
-
 module Coupling
   class AssetNotFoundError < StandardError
     def initialize(name)
@@ -12,13 +11,16 @@ module Coupling
     end
   end
 
-  def self.public_path
-    '/assets'
-  end
+  class << self
+    def config
+      @config ||= Config.new
+    end
 
-  def self.build_dir
-    Rails.root.join('tmp/assets')
+    def configure
+       yield(config)
+    end
   end
 end
 
+require 'coupling/config'
 require 'coupling/version'

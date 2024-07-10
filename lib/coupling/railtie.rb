@@ -11,7 +11,7 @@ module Coupling
 
     config.after_initialize do |app|
       app.routes.prepend do
-        mount Rack::App.new, at: Coupling.public_path
+        mount Rack::App.new, at: Coupling.config.public_path
       end
     end
   end

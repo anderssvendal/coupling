@@ -11,7 +11,7 @@ module Coupling
     end
 
     def absolute_path
-      Coupling.build_dir.join(path)
+      Coupling.config.root.join(path)
     end
 
     def read
