@@ -19,8 +19,13 @@ module Coupling
     def configure
        yield(config)
     end
+
+    def manifest
+      @manifest ||= Coupling::Manifest.new
+    end
   end
 end
 
 require 'coupling/config'
+require 'coupling/manifest'
 require 'coupling/version'

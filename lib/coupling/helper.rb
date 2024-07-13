@@ -27,7 +27,7 @@ module Coupling
     end
 
     def coupled_manifest
-      @coupled_manifest ||= Coupling::Manifest.new
+      Coupling.manifest
     end
   end
 end
