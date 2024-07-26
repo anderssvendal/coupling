@@ -1,11 +1,14 @@
+require 'listen'
 require 'coupling/asset'
 
 module Coupling
   class Manifest
-    class << self
-      def find(name)
-        new.find(name)
-      end
+    attr_reader :config, :listener, :entries
+
+    def initialize(config)
+      @config = config
+
+      listen
     end
 
     def lookup(name)
@@ -15,40 +18,62 @@ module Coupling
     end
 
     def path_to(name)
-      "#{Coupling.config.public_path}/#{lookup(name)}"
+      "#{public_path}/#{lookup(name)}"
     end
 
     def find(name)
       name = normalize_name(name)
 
-      raise_asset_not_found(name) unless entries.values.include?(name)
+      assets.find { _1.name == name || _1.path == name } || raise_asset_not_found(name)
+    end
 
-      Asset.new(name)
+    def assets
+      entries.map do |k, v|
+        Asset.new(k, v)
+      end
     end
 
     def entries
       @entries ||= JSON
         .load_file(path)
         .each_with_object({}) do |(k, v), entries|
-          k = k.gsub(/^#{path_prefix}/, '')
-          v = v.gsub(/^#{path_prefix}/, '')
+          k = normalize_name(k)
+          v = normalize_name(v)
 
           entries[k] = v
         end
     end
-
+    
     private
 
-    def path
-      Coupling.config.root.join('manifest.json')
+    def listen
+      puts 'create listener'
+      @listener = Listen.to(dirname) do |modified, added, removed|
+        next unless modified.include?(path.to_s)
+
+        @entries = nil
+      end
+      listener.start
     end
 
-    def path_prefix
-      Coupling.config.root.to_s.gsub(Rails.root.to_s, '').gsub(/^\//, '') + '/'
+    def path
+      config.root.join('manifest.json')
+    end
+
+    def dirname
+      File.dirname(path)
+    end
+
+    def filename
+      File.basename(path)
+    end
+
+    def public_path
+      config.public_path
     end
 
     def normalize_name(name)
-      name.gsub(/^#{Coupling.config.public_path}\/*/, '')
+      name.gsub(/^#{public_path}\/*/, '')
     end
 
     def raise_asset_not_found(name)

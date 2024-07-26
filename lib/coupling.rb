@@ -21,8 +21,14 @@ module Coupling
     end
 
     def manifest
-      @manifest ||= Coupling::Manifest.new
+      @manifest ||= Coupling::Manifest.new(config)
     end
+
+    def clear_manifest
+      @manifest = nil
+    end
+
+    delegate :assets, to: :manifest
   end
 end
 

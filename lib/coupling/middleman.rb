@@ -1,15 +1,9 @@
+require 'coupling/middleman/extension'
+require 'coupling/middleman/middleware'
+
 module Coupling
-  class Middleman < Middleman::Extension
-    option :root
-
-    def initialize(app, options_hash={}, &block)
-      super
-
-      # puts 'config Coupling'
-      # puts options
-      # binding.irb
-    end
+  module Middleman
   end
 end
 
-::Middleman::Extensions.register(:coupling, Coupling::Middleman)
+::Middleman::Extensions.register(:coupling, Coupling::Middleman::Extension)

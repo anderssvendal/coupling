@@ -1,13 +1,16 @@
+require 'mime-types'
+
 module Coupling
   class Asset
-    attr_reader :path
+    attr_reader :name, :path
 
-    def initialize(path)
-      @path = path
+    def initialize(name, path = nil)
+      @name = name
+      @path = path || name
     end
 
     def extension
-      @extension ||= path.to_s.split('.').last.to_sym
+      @extension ||= path.to_s.split('.').last.to_s
     end
 
     def absolute_path
@@ -19,7 +22,7 @@ module Coupling
     end
 
     def content_type
-      Mime::Type.lookup_by_extension(extension).to_s.presence || 'text/plain'
+      MIME::Types.type_for(extension).try(:first).try(:to_s) || 'text/plain'
     end
   end
 end

@@ -3,8 +3,8 @@ require 'coupling/manifest'
 module Coupling::Rack
   class App
     def call(env)
-      req =  Rack::Request.new(env)
-      asset = Coupling::Manifest.find(req.path)
+      req = Rack::Request.new(env)
+      asset = Coupling.manifest.find(req.path)
 
       [
         200,
