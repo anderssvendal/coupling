@@ -47,7 +47,6 @@ module Coupling
     private
 
     def listen
-      puts 'create listener'
       @listener = Listen.to(dirname) do |modified, added, removed|
         next unless modified.include?(path.to_s)
 
