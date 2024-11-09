@@ -1,6 +1,7 @@
 import esbuild from 'esbuild';
 import { sassPlugin } from 'esbuild-sass-plugin';
 import manifestPlugin from 'esbuild-plugin-manifest';
+import ImportGlobPlugin from 'esbuild-plugin-import-glob';
 
 const env = (process.env['NODE_ENV'] ?? 'development').toLowerCase();
 const production = env === 'production';
@@ -23,7 +24,8 @@ const options = {
           in: `source/assets/${name}.scss`
         },
       ];
-    })
+    }),
+    'source/assets/images.js'
   ],
   entryNames: '[name]-[hash]',
   outdir: 'tmp/assets',
@@ -40,14 +42,32 @@ const options = {
   },
   plugins: [
     manifestPlugin({
-      shortNames: true
+      generate(files) {
+        const transform = (string) => {
+          const outdir = 'tmp/assets';
+          const expression = new RegExp(`^${outdir}/+`);
+
+          return string.replace(expression, '');
+        }
+
+        return Object.entries(files)
+          .reduce((files, keyValue) => {
+            const [key, value] = keyValue.map(transform);
+
+            return {
+              ...files,
+              [key]: value
+            }
+          }, {})
+      }
     }),
+    ImportGlobPlugin.default(),
     sassPlugin(),
   ]
 };
 
 
-if (serve || watch) {
+if (watch) {
   const context = await esbuild.context(options);
   await context.watch();
 }

@@ -6,6 +6,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.23.0",
+    "esbuild-plugin-import-glob": "^0.1.1",
     "esbuild-plugin-manifest": "^1.0.4",
     "esbuild-sass-plugin": "^3.3.1"
   }
