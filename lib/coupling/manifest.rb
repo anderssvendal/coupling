@@ -37,6 +37,8 @@ module Coupling
       @entries ||= JSON
         .load_file(path)
         .each_with_object({}) do |(k, v), entries|
+          next unless k.is_a?(String) && v.is_a?(String)
+
           k = normalize_name(k)
           v = normalize_name(v)
 
