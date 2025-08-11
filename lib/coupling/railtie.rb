@@ -3,7 +3,7 @@ require 'coupling/rack/app'
 
 module Coupling
   class Railtie < Rails::Railtie
-    initializer :add_helper do
+    initializer 'coupling.helper' do
       ActiveSupport.on_load(:action_view) do
         include Helper
       end

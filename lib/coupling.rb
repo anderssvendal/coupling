@@ -34,4 +34,5 @@ end
 
 require 'coupling/config'
 require 'coupling/manifest'
+require 'coupling/railtie' if defined?(Rails::Railtie)
 require 'coupling/version'
