@@ -18,7 +18,7 @@ module Coupling
     end
 
     def path_to(name)
-      "#{public_path}/#{lookup(name)}"
+      "#{public_path}/#{lookup(name)}".gsub(/\/{2,}/, '/')
     end
 
     def find(name)
