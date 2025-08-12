@@ -18,8 +18,8 @@ module Coupling
       content_tag('script', src: coupled_asset_path(name)) { '' }
     end
 
-    def coupled_image_tag(name)
-      image_tag(coupled_asset_path(name))
+    def coupled_image_tag(name, options = {})
+      image_tag(coupled_asset_path(name), options)
     end
 
     def coupled_assets
