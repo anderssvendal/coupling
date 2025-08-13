@@ -74,7 +74,9 @@ module Coupling
     end
 
     def normalize_name(name)
-      name.gsub(/^#{public_path}\/*/, '')
+      name
+        .gsub(/^#{public_path}\/*/, '')
+        .gsub(/^\//, '')
     end
 
     def raise_asset_not_found(name)
