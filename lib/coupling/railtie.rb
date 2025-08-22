@@ -20,6 +20,8 @@ module Coupling
     end
 
     config.after_initialize do |app|
+      next unless Coupling.config.serve?
+
       app.routes.prepend do
         mount Rack::App.new, at: Coupling.config.public_path
       end
