@@ -7,10 +7,10 @@ module Coupling
       next unless Rails.env.development?
 
       ActiveSupport.on_load(:action_controller) do
-          ActionDispatch::Callbacks.before do
-            Coupling.clear_manifest
-          end
+        ActionDispatch::Callbacks.before do
+          Coupling.clear_manifest
         end
+      end
     end
 
     initializer 'coupling.helper' do

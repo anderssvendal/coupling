@@ -20,5 +20,9 @@ module Coupling
     def serve?
       !!@serve
     end
+
+    def serve?
+      !!serve
+    end
   end
 end
