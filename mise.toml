@@ -1,0 +1,26 @@
+[tools]
+ruby = "3.3.12"
+
+[tasks.setup]
+description = "Install development dependencies"
+run = "bundle install"
+
+[tasks.test]
+description = "Run the test suite"
+run = "bundle exec rake test"
+
+[tasks.lint]
+description = "Run RuboCop"
+run = "bundle exec rake rubocop"
+
+[tasks.check]
+description = "Run tests and lint"
+depends = ["test", "lint"]
+
+[tasks.console]
+description = "Start an interactive Coupling console"
+run = "bundle exec bin/console"
+
+[tasks.build]
+description = "Build the gem"
+run = "bundle exec rake build"
