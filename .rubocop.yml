@@ -4,6 +4,8 @@ AllCops:
   SuggestExtensions: false
   Exclude:
     - "examples/**/*"
+    - "lib/coupling/middleman.rb"
+    - "lib/coupling/middleman/**/*"
 
 Style/StringLiterals:
   Enabled: true
@@ -12,6 +14,10 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   Enabled: true
   EnforcedStyle: double_quotes
+
+Style/RegexpLiteral:
+  EnforcedStyle: slashes
+  AllowInnerSlashes: true
 
 Layout/LineLength:
   Max: 120

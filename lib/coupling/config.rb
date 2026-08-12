@@ -13,7 +13,7 @@ module Coupling
     end
 
     def public_path=(value)
-      @public_path = value.to_s.gsub(%r{/+$}, "")
+      @public_path = value.to_s.gsub(/\/+$/, "")
     end
 
     def helpers?
