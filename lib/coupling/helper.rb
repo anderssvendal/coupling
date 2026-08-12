@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "coupling/manifest"
 
 module Coupling
@@ -8,16 +10,16 @@ module Coupling
     module_function :coupled_asset_path
 
     def coupled_stylesheet_link_tag(name)
-      name = "#{name}.css" unless name.ends_with?('.css')
+      name = "#{name}.css" unless name.ends_with?(".css")
 
-      tag(:link, href: coupled_asset_path(name), rel: 'stylesheet')
+      tag(:link, href: coupled_asset_path(name), rel: "stylesheet")
     end
     module_function :coupled_stylesheet_link_tag
 
     def coupled_javascript_include_tag(name)
-      name = "#{name}.js" unless name.ends_with?('.js')
+      name = "#{name}.js" unless name.ends_with?(".js")
 
-      content_tag('script', src: coupled_asset_path(name)) { '' }
+      content_tag("script", src: coupled_asset_path(name)) { "" }
     end
     module_function :coupled_javascript_include_tag
 

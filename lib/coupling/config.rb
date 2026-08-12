@@ -1,16 +1,19 @@
+# frozen_string_literal: true
+
 module Coupling
   class Config
-    attr_accessor :root, :public_path
+    attr_accessor :root
+    attr_reader :public_path
     attr_writer :helpers, :serve
 
     def initialize
-      self.public_path = '/assets'
+      self.public_path = "/assets"
       self.helpers = true
       self.serve = true
     end
 
     def public_path=(value)
-      @public_path = value.to_s.gsub(/\/+$/, '')
+      @public_path = value.to_s.gsub(%r{/+$}, "")
     end
 
     def helpers?

@@ -1,9 +1,11 @@
-require 'coupling/helper'
-require 'coupling/rack/app'
+# frozen_string_literal: true
+
+require "coupling/helper"
+require "coupling/rack/app"
 
 module Coupling
   class Railtie < Rails::Railtie
-    initializer "coupling.clear" do |app|
+    initializer "coupling.clear" do |_app|
       next unless Rails.env.development?
 
       ActiveSupport.on_load(:action_controller) do
@@ -13,10 +15,10 @@ module Coupling
       end
     end
 
-    initializer 'coupling.helper' do
+    initializer "coupling.helper" do
       ActiveSupport.on_load(:action_view) do
         include Helper
-     end
+      end
     end
 
     config.after_initialize do |app|

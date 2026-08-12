@@ -1,5 +1,9 @@
 AllCops:
-  TargetRubyVersion: 2.6
+  TargetRubyVersion: 3.1
+  NewCops: enable
+  SuggestExtensions: false
+  Exclude:
+    - "examples/**/*"
 
 Style/StringLiterals:
   Enabled: true
@@ -11,3 +15,12 @@ Style/StringLiteralsInInterpolation:
 
 Layout/LineLength:
   Max: 120
+
+Gemspec/RequireMFA:
+  Enabled: false
+
+Metrics/MethodLength:
+  Max: 20
+
+Style/Documentation:
+  Enabled: false

@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = "Use assets from manifest.json"
   spec.homepage = "https://github.com/anderssvendal/coupling"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = ">= 3.1"
 
   spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
@@ -22,5 +22,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "listen"
   spec.add_dependency "mime-types"
 
-  spec.files = `git ls-files`.split("\n")
+  spec.files = (Dir["lib/**/*.rb"] + %w[CHANGELOG.md LICENSE.txt README.md]).sort
 end

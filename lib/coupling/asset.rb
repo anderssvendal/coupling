@@ -1,4 +1,6 @@
-require 'mime-types'
+# frozen_string_literal: true
+
+require "mime-types"
 
 module Coupling
   class Asset
@@ -10,7 +12,7 @@ module Coupling
     end
 
     def extension
-      @extension ||= path.to_s.split('.').last.to_s
+      @extension ||= path.to_s.split(".").last.to_s
     end
 
     def absolute_path
@@ -22,7 +24,7 @@ module Coupling
     end
 
     def content_type
-      MIME::Types.type_for(extension).try(:first).try(:to_s) || 'text/plain'
+      MIME::Types.type_for(extension).try(:first).try(:to_s) || "text/plain"
     end
   end
 end

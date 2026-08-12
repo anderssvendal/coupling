@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Coupling
   class AssetNotFoundError < StandardError
     def initialize(name)
@@ -6,7 +8,7 @@ module Coupling
   end
 
   class ManifestNotFoundError < StandardError
-    def initialize(name)
+    def initialize(_name)
       super("Manifest not found. Make sure assets have been built")
     end
   end
@@ -17,7 +19,7 @@ module Coupling
     end
 
     def configure
-       yield(config)
+      yield(config)
     end
 
     def manifest
@@ -28,11 +30,13 @@ module Coupling
       @manifest = nil
     end
 
-    delegate :assets, to: :manifest
+    def assets
+      manifest.assets
+    end
   end
 end
 
-require 'coupling/config'
-require 'coupling/manifest'
-require 'coupling/railtie' if defined?(Rails::Railtie)
-require 'coupling/version'
+require "coupling/config"
+require "coupling/manifest"
+require "coupling/railtie" if defined?(Rails::Railtie)
+require "coupling/version"

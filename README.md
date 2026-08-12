@@ -1,3 +1,3 @@
 # Coupling
 
-BYOB to Rails, Middleman, and Rack apps.
+BYOB assets to Rails and Rack apps.

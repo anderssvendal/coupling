@@ -1,20 +1,24 @@
-require 'coupling/manifest'
+# frozen_string_literal: true
 
-module Coupling::Rack
-  class App
-    def call(env)
-      req = Rack::Request.new(env)
-      asset = Coupling.manifest.find(req.path)
+require "coupling/manifest"
 
-      [
-        200,
-        {
-          'Content-Type' => asset.content_type
-        },
+module Coupling
+  module Rack
+    class App
+      def call(env)
+        req = Rack::Request.new(env)
+        asset = Coupling.manifest.find(req.path)
+
         [
-          asset.read
+          200,
+          {
+            "Content-Type" => asset.content_type
+          },
+          [
+            asset.read
+          ]
         ]
-      ]
+      end
     end
   end
 end
