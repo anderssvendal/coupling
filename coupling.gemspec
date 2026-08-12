@@ -22,5 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "listen"
   spec.add_dependency "mime-types"
 
-  spec.files = (Dir["lib/**/*.rb"] + %w[CHANGELOG.md LICENSE.txt README.md]).sort
+  runtime_files = Dir["lib/**/*.rb"].reject { |file| file.start_with?("lib/coupling/middleman") }
+  spec.files = (runtime_files + %w[CHANGELOG.md LICENSE.txt README.md]).sort
 end
