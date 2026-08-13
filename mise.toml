@@ -2,11 +2,15 @@
 ruby = "3.3.12"
 
 [tasks.setup]
-description = "Install development dependencies"
-run = "bundle install"
+description = "Install development and Rails compatibility dependencies"
+run = """
+bundle install
+bundle exec appraisal generate
+bundle exec appraisal install
+"""
 
 [tasks.test]
-description = "Run the test suite"
+description = "Run the Rails-independent core and Rack suite"
 run = "bundle exec rake test"
 
 [tasks.lint]
@@ -14,8 +18,17 @@ description = "Run RuboCop"
 run = "bundle exec rake rubocop"
 
 [tasks.check]
-description = "Run tests and lint"
+description = "Run Rails-independent tests and lint"
 depends = ["test", "lint"]
+
+[tasks.rails-compatibility]
+description = "Test Rails 7.0, 7.1, 7.2, and 8.x (Rails 8 requires Ruby 3.2+)"
+run = """
+bundle exec appraisal rails-7.0 rake test
+bundle exec appraisal rails-7.1 rake test
+bundle exec appraisal rails-7.2 rake test
+bundle exec appraisal rails-8 rake test
+"""
 
 [tasks.console]
 description = "Start an interactive Coupling console"

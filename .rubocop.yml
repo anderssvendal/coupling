@@ -4,6 +4,7 @@ AllCops:
   SuggestExtensions: false
   Exclude:
     - "examples/**/*"
+    - "gemfiles/**/*"
     - "lib/coupling/middleman.rb"
     - "lib/coupling/middleman/**/*"
 
