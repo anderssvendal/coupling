@@ -2,11 +2,12 @@
 ruby = "3.3.12"
 
 [tasks.setup]
-description = "Install development and Rails compatibility dependencies"
+description = "Install development, Rails compatibility, and example dependencies"
 run = """
 bundle install
 bundle exec appraisal generate
 bundle exec appraisal install
+BUNDLE_GEMFILE=examples/rails/Gemfile bundle install
 """
 
 [tasks.test]
@@ -29,6 +30,17 @@ bundle exec appraisal rails-7.1 rake test
 bundle exec appraisal rails-7.2 rake test
 bundle exec appraisal rails-8 rake test
 """
+
+[tasks.rails-example]
+description = "Smoke-test the Ruby-only Rails example with and without Coupling serving"
+run = """
+BUNDLE_GEMFILE=examples/rails/Gemfile RAILS_ENV=development bundle exec ruby examples/rails/test/smoke_test.rb
+BUNDLE_GEMFILE=examples/rails/Gemfile RAILS_ENV=test bundle exec ruby examples/rails/test/smoke_test.rb
+"""
+
+[tasks.verify]
+description = "Run all tests, lint, Rails compatibility checks, and the Rails example smoke test"
+depends = ["check", "rails-compatibility", "rails-example"]
 
 [tasks.console]
 description = "Start an interactive Coupling console"
