@@ -16,33 +16,35 @@ module Coupling
 
         serve(request)
       rescue AssetNotFoundError, Errno::ENOENT, Errno::ENOTDIR
-        not_found(head: env["REQUEST_METHOD"] == "HEAD")
+        not_found(env)
       end
 
       private
 
       def serve(request)
         output_path = request.path_info.to_s.delete_prefix("/")
-        return not_found(head: request.head?) if manifest_request?(output_path)
+        return not_found(request.env) if manifest_request?(output_path)
 
         asset = Coupling.manifest.find(output_path)
-        successful(asset.read, asset.path, head: request.head?)
-      end
-
-      def successful(content, path, head:)
+        content = asset.read
         response(
           200,
           content,
           {
             "cache-control" => "no-cache",
-            "content-type" => ::Rack::Mime.mime_type(File.extname(path).downcase, FALLBACK_MIME_TYPE)
+            "content-type" => ::Rack::Mime.mime_type(File.extname(asset.path).downcase, FALLBACK_MIME_TYPE)
           },
-          head: head
+          head: request.head?
         )
       end
 
-      def not_found(head: false)
-        response(404, "Not Found\n", { "content-type" => "text/plain; charset=utf-8" }, head: head)
+      def not_found(env)
+        response(
+          404,
+          "Not Found\n",
+          { "content-type" => "text/plain; charset=utf-8" },
+          head: env["REQUEST_METHOD"] == "HEAD"
+        )
       end
 
       def method_not_allowed
