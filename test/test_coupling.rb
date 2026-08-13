@@ -42,6 +42,9 @@ class TestCoupling < Minitest::Test
       require "coupling"
       abort "Rails loaded" if defined?(Rails)
       abort "ActiveSupport loaded" if $LOADED_FEATURES.any? { |feature| feature.include?("active_support") }
+      abort "Rack loaded" if $LOADED_FEATURES.any? do |feature|
+        feature.end_with?("/rack.rb") || feature.include?("/rack/")
+      end
       abort "listen loaded" if $LOADED_FEATURES.any? { |feature| feature.include?("listen") }
       puts Coupling::VERSION
     RUBY

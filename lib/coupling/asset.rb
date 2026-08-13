@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require "mime-types"
 require "pathname"
 
 module Coupling
@@ -13,10 +12,6 @@ module Coupling
       @config = config
     end
 
-    def extension
-      @extension ||= path.to_s.split(".").last.to_s
-    end
-
     def absolute_path
       root = File.expand_path(config.assets_path.to_s)
       candidate = File.expand_path(path.to_s, root)
@@ -27,11 +22,6 @@ module Coupling
 
     def read
       File.binread(absolute_path)
-    end
-
-    def content_type
-      type = MIME::Types.type_for(extension).first
-      type ? type.to_s : "text/plain"
     end
 
     private

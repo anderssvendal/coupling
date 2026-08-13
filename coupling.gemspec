@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"] = "https://github.com/anderssvendal/coupling"
   spec.metadata["changelog_uri"] = "https://github.com/anderssvendal/coupling"
 
-  spec.add_dependency "mime-types"
+  spec.add_dependency "rack", ">= 2.2"
 
   runtime_files = Dir["lib/**/*.rb"].reject { |file| file.start_with?("lib/coupling/middleman") }
   spec.files = (runtime_files + %w[CHANGELOG.md LICENSE.txt README.md]).sort

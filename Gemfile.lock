@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     coupling (0.1.0)
-      mime-types
+      rack (>= 2.2)
 
 GEM
   remote: https://rubygems.org/
@@ -117,10 +117,6 @@ GEM
       net-pop
       net-smtp
     marcel (1.2.1)
-    mime-types (3.7.0)
-      logger
-      mime-types-data (~> 3.2025, >= 3.2025.0507)
-    mime-types-data (3.2026.0701)
     mini_mime (1.1.5)
     mini_portile2 (2.8.9)
     minitest (5.27.0)
