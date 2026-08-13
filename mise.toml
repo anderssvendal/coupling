@@ -22,7 +22,7 @@ run = "bundle exec rake rubocop"
 description = "Run Rails-independent tests and lint"
 depends = ["test", "lint"]
 
-[tasks.rails-compatibility]
+[tasks."rails:compatibility"]
 description = "Test Rails 7.0, 7.1, 7.2, and 8.x (Rails 8 requires Ruby 3.2+)"
 run = """
 bundle exec appraisal rails-7.0 rake test
@@ -31,21 +31,21 @@ bundle exec appraisal rails-7.2 rake test
 bundle exec appraisal rails-8 rake test
 """
 
-[tasks.rails-example]
+[tasks."rails:test"]
 description = "Smoke-test the Ruby-only Rails example with and without Coupling serving"
 run = """
 BUNDLE_GEMFILE=examples/rails/Gemfile RAILS_ENV=development bundle exec ruby examples/rails/test/smoke_test.rb
 BUNDLE_GEMFILE=examples/rails/Gemfile RAILS_ENV=test bundle exec ruby examples/rails/test/smoke_test.rb
 """
 
-[tasks.rails-example-server]
+[tasks."rails:server"]
 description = "Start the Rails example at http://127.0.0.1:3000"
 dir = "examples/rails"
 run = "bundle exec rails server --binding 127.0.0.1 --port ${PORT:-3000}"
 
 [tasks.verify]
 description = "Run all tests, lint, Rails compatibility checks, and the Rails example smoke test"
-depends = ["check", "rails-compatibility", "rails-example"]
+depends = ["check", "rails:compatibility", "rails:test"]
 
 [tasks.console]
 description = "Start an interactive Coupling console"
