@@ -63,6 +63,7 @@ GEM
       nokogiri (>= 1.12.0)
     minitest (5.27.0)
     mutex_m (0.3.0)
+    nio4r (2.7.5)
     nokogiri (1.19.4-aarch64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.19.4-aarch64-linux-musl)
@@ -83,6 +84,8 @@ GEM
       prettyprint
     prettyprint (0.2.0)
     prism (1.9.0)
+    puma (6.6.1)
+      nio4r (~> 2.0)
     racc (1.8.1)
     rack (3.2.7)
     rack-session (2.1.2)
@@ -143,6 +146,7 @@ DEPENDENCIES
   actionview (~> 7.1.3, >= 7.1.3.4)
   coupling!
   minitest (~> 5.16)
+  puma (~> 6.0)
   railties (~> 7.1.3, >= 7.1.3.4)
 
 RUBY VERSION
