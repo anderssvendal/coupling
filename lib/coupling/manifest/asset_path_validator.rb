@@ -4,7 +4,7 @@ require "pathname"
 
 module Coupling
   class Manifest
-    class OutputValidator
+    class AssetPathValidator
       attr_reader :config, :name, :output
 
       def initialize(config, name, output)

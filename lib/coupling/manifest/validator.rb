@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "coupling/manifest/output_validator"
+require "coupling/manifest/asset_path_validator"
 
 module Coupling
   class Manifest
@@ -27,7 +27,7 @@ module Coupling
         normalized_name = normalizer.call(name)
         validate_normalized_name!(validated, name, normalized_name)
         outputs = normalize_outputs(normalized_name, value)
-        outputs.each { |output| OutputValidator.new(config, normalized_name, output).validate }
+        outputs.each { |output| AssetPathValidator.new(config, normalized_name, output).validate }
         validate_duplicates!(normalized_name, outputs)
         validated[normalized_name] = outputs
       end
