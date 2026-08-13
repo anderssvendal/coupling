@@ -62,7 +62,7 @@ module Coupling
     rescue Errno::ENOENT => e
       raise ManifestNotFoundError.new(config.manifest_path), cause: e
     rescue JSON::ParserError => e
-      raise InvalidManifestError.new(config.manifest_path, e.message), cause: e
+      raise InvalidManifestError.new(config.manifest_path, "malformed JSON"), cause: e
     end
 
     def public_url(output)

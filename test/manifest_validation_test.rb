@@ -11,12 +11,14 @@ class ManifestValidationTest < ManifestTestCase
     assert_instance_of Errno::ENOENT, error.cause
   end
 
-  def test_malformed_json_has_manifest_context_and_preserves_cause
-    @manifest_path.write("{")
+  def test_malformed_json_has_safe_manifest_context_and_preserves_cause
+    @manifest_path.write('{"token":"super-secret",')
 
     error = assert_raises(Coupling::InvalidManifestError) { @manifest.entries }
 
     assert_includes error.message, @manifest_path.to_s
+    assert_includes error.message, "malformed JSON"
+    refute_includes error.message, "super-secret"
     assert_instance_of JSON::ParserError, error.cause
   end
 
