@@ -65,4 +65,29 @@ class ConfigTest < Minitest::Test
     refute config.serve?
     assert config.serve_configured?
   end
+
+  def test_rails_defaults_use_the_application_root_and_environment
+    config = Coupling::Config.new
+
+    config.apply_rails_defaults(root: "/app", development: true)
+
+    assert_equal Pathname.new("/app/tmp/assets"), config.assets_path
+    assert_equal Pathname.new("/app/tmp/assets/manifest.json"), config.manifest_path
+    assert config.serve?
+    refute config.assets_path_configured?
+    refute config.serve_configured?
+  end
+
+  def test_rails_defaults_preserve_explicit_path_and_serve_settings
+    config = Coupling::Config.new
+    config.assets_path = "/custom/assets"
+    config.manifest_path = "/custom/metadata.json"
+    config.serve = false
+
+    config.apply_rails_defaults(root: "/app", development: true)
+
+    assert_equal Pathname.new("/custom/assets"), config.assets_path
+    assert_equal Pathname.new("/custom/metadata.json"), config.manifest_path
+    refute config.serve?
+  end
 end
