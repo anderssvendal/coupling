@@ -28,6 +28,21 @@ class ManifestValidationTest < ManifestTestCase
     end
   end
 
+  def test_rejects_empty_and_non_string_logical_names
+    assert_invalid({ "" => "asset.js" }, "logical names")
+
+    validator = Coupling::Manifest::Validator.new(@config, ->(name) { name })
+    error = assert_raises(Coupling::InvalidManifestError) { validator.validate(1 => "asset.js") }
+    assert_includes error.message, "logical names"
+  end
+
+  def test_rejects_mixed_valid_and_invalid_entries
+    assert_invalid(
+      { "valid.js" => "valid-A1.js", "invalid.js" => ["valid-B2.js", nil] },
+      "must map"
+    )
+  end
+
   def test_rejects_invalid_value_contracts
     invalid_values = ["", [], [""], ["valid.js", ""], ["valid.js", 1], nil, 1, true, { "file" => "asset.js" }]
 
