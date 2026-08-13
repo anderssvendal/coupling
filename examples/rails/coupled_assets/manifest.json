@@ -1,0 +1,11 @@
+{
+  "application.css": [
+    "styles/reset-A1B2C3.css",
+    "application-D4E5F6.css"
+  ],
+  "application.js": [
+    "runtime-A1B2C3.js",
+    "application-D4E5F6.js"
+  ],
+  "images/logo.svg": "images/logo-M4N5P6.svg"
+}
