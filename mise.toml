@@ -54,3 +54,31 @@ run = "bundle exec bin/console"
 [tasks.build]
 description = "Build the gem"
 run = "bundle exec rake build"
+
+[tasks."release:package"]
+description = "Build and audit the release gem"
+run = """
+rm -f pkg/coupling-*.gem
+bundle exec rake build
+bundle exec ruby script/audit_package.rb pkg/coupling-0.1.0.gem
+"""
+
+[tasks."release:installed"]
+description = "Smoke-test the installed release gem with core, Rack, and Rails"
+depends = ["release:package"]
+run = """
+gem_home="$(mktemp -d)"
+trap 'rm -rf "$gem_home"' EXIT
+ruby_gem_path="$(ruby -e 'puts Gem.path.join(":")')"
+gem install --install-dir "$gem_home" --no-document pkg/coupling-0.1.0.gem
+env -u BUNDLE_GEMFILE -u RUBYOPT -u RUBYLIB \
+  GEM_HOME="$gem_home" GEM_PATH="$gem_home:$ruby_gem_path" \
+  EXPECTED_COUPLING_GEM_HOME="$gem_home" ruby script/installed_smoke.rb
+env -u BUNDLE_GEMFILE -u RUBYOPT -u RUBYLIB \
+  GEM_HOME="$gem_home" GEM_PATH="$gem_home:$ruby_gem_path" \
+  EXPECTED_COUPLING_GEM_HOME="$gem_home" ruby script/installed_rails_smoke.rb
+"""
+
+[tasks."release:check"]
+description = "Run the complete local release candidate gate"
+depends = ["verify", "release:installed"]
