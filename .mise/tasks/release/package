@@ -1,12 +1,21 @@
+#!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# [MISE] description="Build and audit the release gem"
+
 require "digest"
+require "fileutils"
 require "rubygems/package"
 
-artifact = ARGV.fetch(0)
+root = ENV.fetch("MISE_PROJECT_ROOT")
+artifact = File.join(root, "pkg/coupling-0.1.0.gem")
+
+FileUtils.rm_f(Dir[File.join(root, "pkg/coupling-*.gem")])
+abort "Gem build failed" unless system("bundle", "exec", "rake", "build", chdir: root)
+
 package = Gem::Package.new(artifact)
 spec = package.spec
-expected_files = Gem::Specification.load("coupling.gemspec").files.sort
+expected_files = Gem::Specification.load(File.join(root, "coupling.gemspec")).files.sort
 actual_files = package.contents.sort
 
 unless actual_files == expected_files
@@ -20,6 +29,6 @@ abort "Unexpected runtime dependencies" unless spec.runtime_dependencies.map(&:n
 abort "Unexpected Rack requirement" unless spec.runtime_dependencies.first.requirement.to_s == ">= 2.2"
 abort "Unexpected push host" unless spec.metadata["allowed_push_host"] == "https://gem.coop/@hjkl"
 
-puts "Package: #{artifact}"
+puts "Package: #{artifact.delete_prefix("#{root}/")}"
 puts "Files: #{actual_files.length}"
 puts "SHA256: #{Digest::SHA256.file(artifact).hexdigest}"

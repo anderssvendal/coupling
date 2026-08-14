@@ -1,0 +1,7 @@
+#!/bin/sh
+# [MISE] description="Run the complete local release candidate gate"
+# [MISE] depends=["verify", "release:installed"]
+
+set -eu
+
+:
