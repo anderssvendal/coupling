@@ -24,6 +24,23 @@ class ManifestTest < ManifestTestCase
     assert_empty @manifest.entries
   end
 
+  def test_named_and_anonymous_entries_coexist_without_changing_named_lookup
+    write_manifest(
+      "application.js" => "application-A1.js",
+      "" => ["shared-B2.js", "application-A1.js.map"]
+    )
+
+    assert_equal(
+      {
+        "application.js" => ["application-A1.js"],
+        "" => ["shared-B2.js", "application-A1.js.map"]
+      },
+      @manifest.entries
+    )
+    assert_equal ["application-A1.js"], @manifest.lookup_all("application.js")
+    assert_equal "application-A1.js", @manifest.lookup("application.js")
+  end
+
   def test_plural_and_singular_lookups_preserve_order
     write_manifest(
       "application.js" => ["runtime-A1.js", "application-B2.js"],
@@ -72,27 +89,35 @@ class ManifestTest < ManifestTestCase
   def test_reverse_lookup_checks_every_output_deterministically
     write_manifest(
       "application.js" => ["runtime-A1.js", "application-B2.js"],
-      "legacy.js" => "application-B2.js"
+      "legacy.js" => "application-B2.js",
+      "" => ["shared-C3.js", "application-B2.js.map"]
     )
 
-    asset = @manifest.find("/packs/application-B2.js")
+    named_asset = @manifest.find("/packs/application-B2.js")
+    anonymous_asset = @manifest.find("/packs/application-B2.js.map")
 
-    assert_equal "application.js", asset.name
-    assert_equal "application-B2.js", asset.path
-    assert_equal @config, asset.config
+    assert_equal "application.js", named_asset.name
+    assert_equal "application-B2.js", named_asset.path
+    assert_equal @config, named_asset.config
+    assert_equal "", anonymous_asset.name
+    assert_equal "application-B2.js.map", anonymous_asset.path
+    assert_equal @config, anonymous_asset.config
   end
 
   def test_assets_flattens_all_outputs_in_manifest_order
     write_manifest(
       "application.js" => ["runtime-A1.js", "application-B2.js"],
-      "application.css" => "application-C3.css"
+      "application.css" => "application-C3.css",
+      "" => ["shared-D4.js", "application-B2.js.map"]
     )
 
     assert_equal(
       [
         ["application.js", "runtime-A1.js"],
         ["application.js", "application-B2.js"],
-        ["application.css", "application-C3.css"]
+        ["application.css", "application-C3.css"],
+        ["", "shared-D4.js"],
+        ["", "application-B2.js.map"]
       ],
       @manifest.assets.map { |asset| [asset.name, asset.path] }
     )

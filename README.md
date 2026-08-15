@@ -55,8 +55,14 @@ Your asset builder must output compiled files and a flat `manifest.json`:
     "application-D4E5F6.css"
   ],
   "application.js": "application-G7H8I9.js",
-  "images/logo.svg": "images/logo-M4N5P6.svg"
+  "images/logo.svg": "images/logo-M4N5P6.svg",
+  "": [
+    "shared-Q7R8S9.js",
+    "application-G7H8I9.js.map"
+  ]
 }
 ```
 
-Each entry maps a logical name to one relative asset path or an ordered array of paths. For now, configure or transform your bundler's output yourself. Instructions and packages for popular bundlers such as Vite are planned.
+Each named entry maps a logical name to one relative asset path or an ordered array of paths. Builders may use the reserved empty key (`""`) for generated outputs that must be served but have no public logical name, such as shared chunks, lazy chunks, and source maps. This anonymous entry must be a non-empty array of unique relative paths. Its files participate in reverse lookup and asset serving, but consumers should not perform logical lookup using the empty key.
+
+For now, configure or transform your bundler's output yourself. Instructions and packages for popular bundlers such as Vite are planned.
