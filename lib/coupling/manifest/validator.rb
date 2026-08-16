@@ -24,22 +24,11 @@ module Coupling
 
       def validate_entry!(validated, name, value)
         validate_name!(name)
-        return validate_anonymous_entry!(validated, value) if name.empty?
-
-        normalized_name = normalizer.call(name)
-        validate_normalized_name!(validated, name, normalized_name)
+        normalized_name = name.empty? ? name : normalizer.call(name)
+        validate_normalized_name!(validated, name, normalized_name) unless name.empty?
         outputs = normalize_outputs(normalized_name, value)
         validate_outputs!(normalized_name, outputs)
         validated[normalized_name] = outputs
-      end
-
-      def validate_anonymous_entry!(validated, value)
-        unless value.is_a?(Array) && valid_outputs?(value)
-          invalid!("anonymous entry must map to a non-empty array of non-empty strings")
-        end
-
-        validate_outputs!("", value)
-        validated[""] = value
       end
 
       def validate_name!(name)
@@ -56,6 +45,12 @@ module Coupling
       end
 
       def normalize_outputs(name, value)
+        if name.empty?
+          return value if valid_outputs?(value)
+
+          invalid!("anonymous entry must map to a non-empty array of non-empty strings")
+        end
+
         outputs = value.is_a?(String) ? [value] : value
         return outputs if valid_outputs?(outputs)
 

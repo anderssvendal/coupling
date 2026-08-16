@@ -3,42 +3,28 @@
 require_relative "support/manifest_test_case"
 
 class ManifestTest < ManifestTestCase
-  def test_normalizes_scalar_and_array_values_to_ordered_arrays
+  def test_normalizes_values_to_ordered_arrays
     write_manifest(
       "application.js" => "application-A1.js",
-      "application.css" => ["vendor-B2.css", "application-C3.css"]
+      "application.css" => ["vendor-B2.css", "application-C3.css"],
+      "" => ["shared-D4.js"]
     )
 
     assert_equal(
       {
         "application.js" => ["application-A1.js"],
-        "application.css" => ["vendor-B2.css", "application-C3.css"]
+        "application.css" => ["vendor-B2.css", "application-C3.css"],
+        "" => ["shared-D4.js"]
       },
       @manifest.entries
     )
+    assert_equal ["application-A1.js"], @manifest.lookup_all("application.js")
   end
 
   def test_empty_manifest_is_valid
     write_manifest({})
 
     assert_empty @manifest.entries
-  end
-
-  def test_named_and_anonymous_entries_coexist_without_changing_named_lookup
-    write_manifest(
-      "application.js" => "application-A1.js",
-      "" => ["shared-B2.js", "application-A1.js.map"]
-    )
-
-    assert_equal(
-      {
-        "application.js" => ["application-A1.js"],
-        "" => ["shared-B2.js", "application-A1.js.map"]
-      },
-      @manifest.entries
-    )
-    assert_equal ["application-A1.js"], @manifest.lookup_all("application.js")
-    assert_equal "application-A1.js", @manifest.lookup("application.js")
   end
 
   def test_plural_and_singular_lookups_preserve_order
