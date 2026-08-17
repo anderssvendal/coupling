@@ -94,10 +94,13 @@ describe("coupling plugin", () => {
     const browserManagedChunks = result.outputs
       .filter((output) => output.type === "chunk" && !output.isEntry)
       .map((output) => output.fileName);
-    const namedLogo = result.manifest["images/logo.svg"];
+    const namedLogo = singleOutput(result.manifest["images/logo.svg"]);
     const outsideAsset = result.fileNames.find(
       (fileName) => fileName.endsWith(".svg") && fileName !== namedLogo,
     );
+    if (outsideAsset === undefined) {
+      throw new Error("Expected an emitted asset outside sourceRoot");
+    }
 
     expect(
       result.outputs.some(
@@ -146,7 +149,7 @@ describe("coupling plugin", () => {
         expect(emittedMaps.length).toBeGreaterThan(0);
         expect(anonymous).toEqual(expect.arrayContaining(emittedMaps));
         expect(
-          emittedMaps.every((fileName) => fileName.endsWith(".js.map")),
+          emittedMaps.every((fileName) => /\.(?:css|js)\.map$/.test(fileName)),
         ).toBe(true);
       } else {
         expect(emittedMaps).toEqual([]);
@@ -299,9 +302,9 @@ describe("coupling plugin", () => {
       );
 
       expect(replaced.length).toBeGreaterThan(0);
-      expect(manifestValues(regenerated)).not.toEqual(
-        expect.arrayContaining(replaced),
-      );
+      for (const replacedOutput of replaced) {
+        expect(manifestValues(regenerated)).not.toContain(replacedOutput);
+      }
       expect(regenerated["application.js"]).not.toBe(initial["application.js"]);
     } finally {
       await watcher?.close();
@@ -426,6 +429,13 @@ function manifestValues(manifest: CouplingManifest): string[] {
   return Object.values(manifest).flatMap((value) =>
     typeof value === "string" ? [value] : value,
   );
+}
+
+function singleOutput(value: string | string[] | undefined): string {
+  if (typeof value !== "string") {
+    throw new Error("Expected one named output");
+  }
+  return value;
 }
 
 function anonymousOutputs(manifest: CouplingManifest): string[] {
