@@ -1,3 +1,15 @@
-<h1>Home#show</h1>
-<%= coupled_assets %>
-<p>Find me in app/views/home/show.html.erb</p>
+<main>
+  <h1>Coupling Rails example</h1>
+  <p>This page uses checked-in compiled assets without an asset bundler.</p>
+
+  <%= coupled_image_tag("images/logo.svg", alt: "Coupling logo", width: 120, height: 120) %>
+
+  <h2>Ordered JavaScript outputs</h2>
+  <ol>
+    <% coupled_asset_paths("application.js").each do |path| %>
+      <li><code><%= path %></code></li>
+    <% end %>
+  </ol>
+
+  <p>Logo URL: <code><%= coupled_asset_path("images/logo.svg") %></code></p>
+</main>

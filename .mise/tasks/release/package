@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# [MISE] description="Build and audit the release gem"
+
+require "digest"
+require "fileutils"
+require "rubygems/package"
+
+root = ENV.fetch("MISE_PROJECT_ROOT")
+artifact = File.join(root, "pkg/coupling-0.1.0.gem")
+
+FileUtils.rm_f(Dir[File.join(root, "pkg/coupling-*.gem")])
+abort "Gem build failed" unless system("bundle", "exec", "rake", "build", chdir: root)
+
+package = Gem::Package.new(artifact)
+spec = package.spec
+expected_files = Gem::Specification.load(File.join(root, "coupling.gemspec")).files.sort
+actual_files = package.contents.sort
+
+unless actual_files == expected_files
+  added = (actual_files - expected_files).map { |file| "+ #{file}" }
+  missing = (expected_files - actual_files).map { |file| "- #{file}" }
+  abort "Package files differ from the gemspec:\n#{(added + missing).join("\n")}"
+end
+
+abort "Unexpected package version: #{spec.version}" unless spec.version.to_s == Coupling::VERSION
+abort "Unexpected runtime dependencies" unless spec.runtime_dependencies.map(&:name) == ["rack"]
+abort "Unexpected Rack requirement" unless spec.runtime_dependencies.first.requirement.to_s == ">= 2.2"
+abort "Unexpected push host" unless spec.metadata["allowed_push_host"] == "https://gem.coop/@hjkl"
+
+puts "Package: #{artifact.delete_prefix("#{root}/")}"
+puts "Files: #{actual_files.length}"
+puts "SHA256: #{Digest::SHA256.file(artifact).hexdigest}"

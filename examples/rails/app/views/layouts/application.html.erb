@@ -1,16 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title>Demo</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-
-    <%= coupled_stylesheet_link_tag('application') %>
+    <title>Coupling Rails example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <%= coupled_stylesheet_link_tag("application", media: "screen") %>
   </head>
-
   <body>
     <%= yield %>
-    <%= coupled_javascript_include_tag('application') %>
+    <%= coupled_javascript_include_tag("application", defer: true) %>
   </body>
 </html>
