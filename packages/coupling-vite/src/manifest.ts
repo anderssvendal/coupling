@@ -85,6 +85,12 @@ export function createNamedManifest(
   return entries.toManifest()
 }
 
+export function representedOutputs(manifest: CouplingManifest): Set<string> {
+  return new Set(
+    Object.values(manifest).flatMap((value) => (typeof value === "string" ? [value] : value)),
+  )
+}
+
 export function serializeManifest(manifest: CouplingManifest): string {
   return `${JSON.stringify(manifest, null, 2)}\n`
 }

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import {
   createNamedManifest,
+  representedOutputs,
   serializeManifest,
   type BuildBundle,
 } from "../src/manifest.js"
@@ -119,6 +120,17 @@ describe("createNamedManifest", () => {
     }
     expect(() => createNamedManifest(conflict, context)).toThrow(
       'conflicting outputs for logical name "application.js"',
+    )
+  })
+
+  it("exposes the complete represented-output set for bundle completion", () => {
+    expect(
+      representedOutputs({
+        "application.js": "assets/application.js",
+        "application.css": ["assets/reset.css", "assets/application.css"],
+      }),
+    ).toEqual(
+      new Set(["assets/application.js", "assets/reset.css", "assets/application.css"]),
     )
   })
 
