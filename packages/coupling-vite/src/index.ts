@@ -1,9 +1,7 @@
-import path from "node:path";
-
 import type { Plugin, ResolvedConfig } from "vite";
 
 import {
-  createNamedManifest,
+  createManifest,
   serializeManifest,
   type BuildBundle,
 } from "./manifest.js";
@@ -16,11 +14,9 @@ export interface CouplingOptions {
 
 interface BuildContext {
   fileName: string;
-  isClientBuild: boolean;
-  outDir: string;
   root: string;
   sourceRoot: string;
-  sourcemap: ResolvedConfig["build"]["sourcemap"];
+  unsupportedReason?: string;
 }
 
 export function coupling(options: CouplingOptions = {}): Plugin {
@@ -36,11 +32,9 @@ export function coupling(options: CouplingOptions = {}): Plugin {
     configResolved(config) {
       buildContext = {
         fileName,
-        isClientBuild: config.command === "build" && !config.build.ssr,
-        outDir: path.resolve(config.root, config.build.outDir),
         root: config.root,
         sourceRoot: resolveSourceRoot(config.root, options.sourceRoot),
-        sourcemap: config.build.sourcemap,
+        unsupportedReason: unsupportedBuildReason(config),
       };
     },
 
@@ -52,7 +46,8 @@ export function coupling(options: CouplingOptions = {}): Plugin {
         );
         return;
       }
-      if (!context.isClientBuild) {
+      if (context.unsupportedReason !== undefined) {
+        this.error(context.unsupportedReason);
         return;
       }
 
@@ -63,7 +58,7 @@ export function coupling(options: CouplingOptions = {}): Plugin {
           );
         }
 
-        const manifest = createNamedManifest(bundle as BuildBundle, {
+        const manifest = createManifest(bundle as BuildBundle, {
           sourceRoot: context.sourceRoot,
           viteRoot: context.root,
         });
@@ -81,6 +76,20 @@ export function coupling(options: CouplingOptions = {}): Plugin {
 }
 
 export default coupling;
+
+function unsupportedBuildReason(config: ResolvedConfig): string | undefined {
+  if (config.build.ssr) {
+    return "Coupling does not support Vite SSR builds";
+  }
+  if (config.build.lib) {
+    return "Coupling does not support Vite library builds";
+  }
+  if (Array.isArray(config.build.rollupOptions.output)) {
+    return "Coupling does not support multiple Rollup outputs";
+  }
+
+  return undefined;
+}
 
 function hasOutputFileName(bundle: BuildBundle, fileName: string): boolean {
   return Object.values(bundle).map(outputFileName).includes(fileName);

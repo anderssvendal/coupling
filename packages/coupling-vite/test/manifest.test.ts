@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  createManifest,
   createNamedManifest,
   representedOutputs,
   serializeManifest,
@@ -11,6 +12,88 @@ const context = {
   sourceRoot: "/repo/app/assets",
   viteRoot: "/repo",
 };
+
+describe("createManifest", () => {
+  it("adds every unrepresented output to a final anonymous entry", () => {
+    const bundle: BuildBundle = {
+      "assets/application-A1.js": {
+        type: "chunk",
+        fileName: "assets/application-A1.js",
+        name: "application",
+        isEntry: true,
+        viteMetadata: {
+          importedCss: new Set(["assets/application-B2.css"]),
+        },
+      },
+      "assets/application-B2.css": {
+        type: "asset",
+        fileName: "assets/application-B2.css",
+        originalFileNames: ["app/assets/application.css"],
+      },
+      "assets/logo-C3.svg": {
+        type: "asset",
+        fileName: "assets/logo-C3.svg",
+        originalFileNames: ["app/assets/images/logo.svg"],
+      },
+      "assets/shared-D4.js": {
+        type: "chunk",
+        fileName: "assets/shared-D4.js",
+        name: "shared",
+        isEntry: false,
+      },
+      "assets/lazy-E5.js": {
+        type: "chunk",
+        fileName: "assets/lazy-E5.js",
+        name: "lazy",
+        isEntry: false,
+        isDynamicEntry: true,
+      },
+      "assets/vendor-F6.svg": {
+        type: "asset",
+        fileName: "assets/vendor-F6.svg",
+        originalFileNames: ["vendor/logo.svg"],
+      },
+      "assets/application-A1.js.map": {
+        type: "asset",
+        fileName: "assets/application-A1.js.map",
+        originalFileNames: ["app/assets/application.ts"],
+      },
+      "assets/generated-G7.css": {
+        type: "asset",
+        fileName: "assets/generated-G7.css",
+        originalFileNames: ["app/assets/generated.css"],
+      },
+    };
+
+    expect(createManifest(bundle, context)).toEqual({
+      "application.js": "assets/application-A1.js",
+      "application.css": "assets/application-B2.css",
+      "images/logo.svg": "assets/logo-C3.svg",
+      "": [
+        "assets/shared-D4.js",
+        "assets/lazy-E5.js",
+        "assets/vendor-F6.svg",
+        "assets/application-A1.js.map",
+        "assets/generated-G7.css",
+      ],
+    });
+  });
+
+  it("omits the anonymous entry when named values cover the bundle", () => {
+    const bundle: BuildBundle = {
+      "assets/application.js": {
+        type: "chunk",
+        fileName: "assets/application.js",
+        name: "application",
+        isEntry: true,
+      },
+    };
+
+    expect(createManifest(bundle, context)).toEqual({
+      "application.js": "assets/application.js",
+    });
+  });
+});
 
 describe("createNamedManifest", () => {
   it("creates deterministic JS, ordered CSS, and source-relative asset entries", () => {

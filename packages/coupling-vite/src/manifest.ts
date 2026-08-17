@@ -36,6 +36,20 @@ interface ViteChunkMetadata {
   importedCss: Iterable<string>;
 }
 
+export function createManifest(
+  bundle: BuildBundle,
+  context: ManifestContext,
+): CouplingManifest {
+  const manifest = createNamedManifest(bundle, context);
+  const represented = representedOutputs(manifest);
+  const anonymous = Object.values(bundle)
+    .map((output) => validateOutputPath(output.fileName))
+    .filter((output) => !represented.has(output))
+    .filter(stableUnique);
+
+  return anonymous.length === 0 ? manifest : { ...manifest, "": anonymous };
+}
+
 export function createNamedManifest(
   bundle: BuildBundle,
   context: ManifestContext,
@@ -93,7 +107,8 @@ function addAssetOutput(
 ): AssetAccumulator {
   if (
     output.type !== "asset" ||
-    accumulator.representedOutputs.has(output.fileName)
+    accumulator.representedOutputs.has(output.fileName) ||
+    isAnonymousOnlyAsset(output.fileName)
   ) {
     return accumulator;
   }
@@ -200,6 +215,10 @@ function viteMetadata(value: unknown): ViteChunkMetadata | undefined {
   }
 
   return { importedCss: importedCss as Iterable<string> };
+}
+
+function isAnonymousOnlyAsset(fileName: string): boolean {
+  return [".css", ".map"].includes(path.posix.extname(fileName));
 }
 
 function originalFileNames(asset: BundleAsset): string[] {
