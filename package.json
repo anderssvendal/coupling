@@ -1,0 +1,11 @@
+{
+  "name": "coupling-workspace",
+  "private": true,
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "build": "pnpm --recursive build",
+    "test": "pnpm --recursive test",
+    "typecheck": "pnpm --recursive typecheck",
+    "check": "pnpm build && pnpm typecheck && pnpm test"
+  }
+}
