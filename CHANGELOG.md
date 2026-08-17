@@ -1,6 +1,6 @@
 ## [Unreleased]
 
-## [0.1.0] - 2026-08-14
+## [0.1.0] - 2026-08-17
 
 - Add strict, uncached lookup for flat JSON manifests with ordered multi-output entries.
 - Add prefixed Rails helpers and optional development asset serving for Rails 7.0 through 8.x.
