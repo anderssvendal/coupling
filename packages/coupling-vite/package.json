@@ -17,9 +17,11 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
-    "test": "vitest run",
+    "audit": "pnpm build && node scripts/audit.mjs",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "test": "pnpm test:unit && pnpm test:compatibility",
     "test:compatibility": "vitest run test/compatibility.test.ts",
+    "test:unit": "vitest run --exclude test/compatibility.test.ts",
     "typecheck": "tsc -p tsconfig.json"
   },
   "engines": {

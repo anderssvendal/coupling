@@ -1,13 +1,16 @@
 [tools]
 ruby = "3.3.12"
+node = "22.22.0"
+pnpm = "10.29.3"
 
 [tasks.setup]
-description = "Install development, Rails compatibility, and example dependencies"
+description = "Install Ruby, Rails compatibility, example, and frozen pnpm dependencies"
 run = """
 bundle install
 bundle exec appraisal generate
 bundle exec appraisal install
 BUNDLE_GEMFILE=examples/rails/Gemfile bundle install
+pnpm install --frozen-lockfile
 """
 
 [tasks.test]
@@ -43,9 +46,33 @@ description = "Start the Rails example at http://127.0.0.1:3000"
 dir = "examples/rails"
 run = "bundle exec rails server --binding 127.0.0.1 --port ${PORT:-3000}"
 
+[tasks."package:build"]
+description = "Build the coupling-vite package"
+run = "pnpm --filter coupling-vite build"
+
+[tasks."package:typecheck"]
+description = "Typecheck coupling-vite source, tests, and public declarations"
+run = "pnpm --filter coupling-vite typecheck"
+
+[tasks."package:test"]
+description = "Run coupling-vite unit and current-Vite integration tests"
+run = "pnpm --filter coupling-vite test:unit"
+
+[tasks."package:compatibility"]
+description = "Run coupling-vite behavior tests with Vite 5, 6, and 7"
+run = "pnpm --filter coupling-vite test:compatibility"
+
+[tasks."package:check"]
+description = "Build, typecheck, lint, and test coupling-vite across supported Vite versions"
+run = "pnpm check"
+
+[tasks."package:audit"]
+description = "Audit and smoke-test the packed coupling-vite package"
+run = "pnpm --filter coupling-vite run audit"
+
 [tasks.verify]
-description = "Run all tests, lint, Rails compatibility checks, and the Rails example smoke test"
-depends = ["check", "rails:compatibility", "rails:test"]
+description = "Run package, Ruby, Rails compatibility, and Rails example checks"
+depends = ["package:check", "check", "rails:compatibility", "rails:test"]
 
 [tasks.console]
 description = "Start an interactive Coupling console"
