@@ -45,9 +45,14 @@ describe("createNamedManifest", () => {
           "app/assets/branding/logo.svg",
         ],
       },
-      "assets/lazy-E5.js": {
+      "assets/body-E5.woff2": {
+        type: "asset",
+        fileName: "assets/body-E5.woff2",
+        originalFileNames: ["app/assets/fonts/body.woff2"],
+      },
+      "assets/lazy-F6.js": {
         type: "chunk",
-        fileName: "assets/lazy-E5.js",
+        fileName: "assets/lazy-F6.js",
         name: "lazy",
         isEntry: false,
         isDynamicEntry: true,
@@ -59,6 +64,7 @@ describe("createNamedManifest", () => {
       "application.css": ["assets/reset-B2.css", "assets/application-C3.css"],
       "images/logo.svg": "assets/logo-D4.svg",
       "branding/logo.svg": "assets/logo-D4.svg",
+      "fonts/body.woff2": "assets/body-E5.woff2",
     })
   })
 
