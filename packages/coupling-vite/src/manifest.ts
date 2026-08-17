@@ -1,117 +1,170 @@
-import path from "node:path"
+import path from "node:path";
 
 import {
   sourceLogicalName,
   validateLogicalName,
   validateOutputPath,
-} from "./paths.js"
+} from "./paths.js";
 
-export type ManifestValue = string | string[]
-export type CouplingManifest = Record<string, ManifestValue>
+export type ManifestValue = string | string[];
+export type CouplingManifest = Record<string, ManifestValue>;
 
 export interface ManifestContext {
-  sourceRoot: string
-  viteRoot: string
+  sourceRoot: string;
+  viteRoot: string;
 }
 
 interface BundleChunk {
-  type: "chunk"
-  fileName: string
-  name: string
-  isEntry: boolean
-  isDynamicEntry?: boolean
-  viteMetadata?: unknown
+  type: "chunk";
+  fileName: string;
+  name: string;
+  isEntry: boolean;
+  isDynamicEntry?: boolean;
+  viteMetadata?: unknown;
 }
 
 interface BundleAsset {
-  type: "asset"
-  fileName: string
-  originalFileName?: string | null
-  originalFileNames?: string[]
+  type: "asset";
+  fileName: string;
+  originalFileName?: string | null;
+  originalFileNames?: string[];
 }
 
-export type BuildBundle = Record<string, BundleChunk | BundleAsset>
+export type BuildBundle = Record<string, BundleChunk | BundleAsset>;
 
 interface ViteChunkMetadata {
-  importedCss: Iterable<string>
+  importedCss: Iterable<string>;
 }
 
 export function createNamedManifest(
   bundle: BuildBundle,
   context: ManifestContext,
 ): CouplingManifest {
-  const entries = new NamedEntries()
+  const outputs = Object.values(bundle);
+  const entries = outputs.reduce(addEntryOutput, new NamedEntries());
+  const assetAccumulator = outputs.reduce(addAssetOutput, {
+    context,
+    entries,
+    representedOutputs: entries.representedOutputs(),
+  });
 
-  for (const output of Object.values(bundle)) {
-    if (output.type !== "chunk" || !output.isEntry || output.isDynamicEntry) continue
+  return assetAccumulator.entries.toManifest();
+}
 
-    const outputPath = validateOutputPath(output.fileName)
-    const extension = path.posix.extname(outputPath)
-    if (extension.length === 0) {
-      throw new Error(`entry chunk has no file extension: ${JSON.stringify(outputPath)}`)
-    }
-
-    const logicalBase = output.name.endsWith(extension)
-      ? output.name.slice(0, -extension.length)
-      : output.name
-    const javascriptName = validateLogicalName(`${logicalBase}${extension}`)
-    entries.add(javascriptName, [outputPath])
-
-    const css = importedCss(output)
-      .map(validateOutputPath)
-      .filter(stableUnique)
-    if (css.length > 0) {
-      entries.add(validateLogicalName(`${logicalBase}.css`), css)
-    }
+function addEntryOutput(
+  entries: NamedEntries,
+  output: BuildBundle[string],
+): NamedEntries {
+  if (output.type !== "chunk" || !output.isEntry || output.isDynamicEntry) {
+    return entries;
   }
 
-  const representedOutputs = entries.representedOutputs()
-  for (const output of Object.values(bundle)) {
-    if (output.type !== "asset" || representedOutputs.has(output.fileName)) continue
-
-    const outputPath = validateOutputPath(output.fileName)
-    for (const originalFileName of originalFileNames(output)) {
-      const logicalName = sourceLogicalName(
-        originalFileName,
-        context.sourceRoot,
-        context.viteRoot,
-      )
-      if (logicalName === undefined) continue
-
-      entries.add(validateLogicalName(logicalName), [outputPath])
-    }
+  const outputPath = validateOutputPath(output.fileName);
+  const extension = path.posix.extname(outputPath);
+  if (extension.length === 0) {
+    throw new Error(
+      `entry chunk has no file extension: ${JSON.stringify(outputPath)}`,
+    );
   }
 
-  return entries.toManifest()
+  const logicalBase = output.name.endsWith(extension)
+    ? output.name.slice(0, -extension.length)
+    : output.name;
+  const javascriptName = validateLogicalName(`${logicalBase}${extension}`);
+  entries.add(javascriptName, [outputPath]);
+
+  const css = importedCss(output).map(validateOutputPath).filter(stableUnique);
+  if (css.length > 0) {
+    entries.add(validateLogicalName(`${logicalBase}.css`), css);
+  }
+
+  return entries;
+}
+
+interface AssetAccumulator {
+  context: ManifestContext;
+  entries: NamedEntries;
+  representedOutputs: Set<string>;
+}
+
+function addAssetOutput(
+  accumulator: AssetAccumulator,
+  output: BuildBundle[string],
+): AssetAccumulator {
+  if (
+    output.type !== "asset" ||
+    accumulator.representedOutputs.has(output.fileName)
+  ) {
+    return accumulator;
+  }
+
+  originalFileNames(output).reduce(addAssetAlias, {
+    context: accumulator.context,
+    entries: accumulator.entries,
+    outputPath: validateOutputPath(output.fileName),
+  });
+
+  return accumulator;
+}
+
+interface AssetAliasAccumulator {
+  context: ManifestContext;
+  entries: NamedEntries;
+  outputPath: string;
+}
+
+function addAssetAlias(
+  accumulator: AssetAliasAccumulator,
+  originalFileName: string,
+): AssetAliasAccumulator {
+  const logicalName = sourceLogicalName(
+    originalFileName,
+    accumulator.context.sourceRoot,
+    accumulator.context.viteRoot,
+  );
+  if (logicalName === undefined) {
+    return accumulator;
+  }
+
+  accumulator.entries.add(validateLogicalName(logicalName), [
+    accumulator.outputPath,
+  ]);
+  return accumulator;
 }
 
 export function representedOutputs(manifest: CouplingManifest): Set<string> {
   return new Set(
-    Object.values(manifest).flatMap((value) => (typeof value === "string" ? [value] : value)),
-  )
+    Object.values(manifest).flatMap((value) =>
+      typeof value === "string" ? [value] : value,
+    ),
+  );
 }
 
 export function serializeManifest(manifest: CouplingManifest): string {
-  return `${JSON.stringify(manifest, null, 2)}\n`
+  return `${JSON.stringify(manifest, null, 2)}\n`;
 }
 
 class NamedEntries {
-  readonly #entries = new Map<string, string[]>()
+  readonly #entries = new Map<string, string[]>();
 
   add(name: string, outputs: string[]): void {
-    const normalized = outputs.filter(stableUnique)
-    const existing = this.#entries.get(name)
+    const normalized = outputs.filter(stableUnique);
+    const existing = this.#entries.get(name);
     if (existing === undefined) {
-      this.#entries.set(name, normalized)
-      return
+      this.#entries.set(name, normalized);
+      return;
     }
-    if (sameValues(existing, normalized)) return
+    if (sameValues(existing, normalized)) {
+      return;
+    }
 
-    throw new Error(`conflicting outputs for logical name ${JSON.stringify(name)}`)
+    throw new Error(
+      `conflicting outputs for logical name ${JSON.stringify(name)}`,
+    );
   }
 
   representedOutputs(): Set<string> {
-    return new Set([...this.#entries.values()].flat())
+    return new Set([...this.#entries.values()].flat());
   }
 
   toManifest(): CouplingManifest {
@@ -120,36 +173,51 @@ class NamedEntries {
         name,
         outputs.length === 1 ? outputs[0] : outputs,
       ]),
-    )
+    );
   }
 }
 
 function importedCss(chunk: BundleChunk): string[] {
-  const metadata = viteMetadata(chunk.viteMetadata)
-  return metadata === undefined ? [] : [...metadata.importedCss]
+  const metadata = viteMetadata(chunk.viteMetadata);
+  return metadata === undefined ? [] : [...metadata.importedCss];
 }
 
 function viteMetadata(value: unknown): ViteChunkMetadata | undefined {
-  if (typeof value !== "object" || value === null || !("importedCss" in value)) return undefined
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    !("importedCss" in value)
+  ) {
+    return undefined;
+  }
 
-  const importedCss = value.importedCss
-  if (importedCss === null || importedCss === undefined) return undefined
-  if (!(Symbol.iterator in Object(importedCss))) return undefined
+  const importedCss = value.importedCss;
+  if (importedCss === null || importedCss === undefined) {
+    return undefined;
+  }
+  if (!(Symbol.iterator in Object(importedCss))) {
+    return undefined;
+  }
 
-  return { importedCss: importedCss as Iterable<string> }
+  return { importedCss: importedCss as Iterable<string> };
 }
 
 function originalFileNames(asset: BundleAsset): string[] {
-  if (asset.originalFileNames !== undefined) return asset.originalFileNames.filter(stableUnique)
+  if (asset.originalFileNames !== undefined) {
+    return asset.originalFileNames.filter(stableUnique);
+  }
   return asset.originalFileName === null || asset.originalFileName === undefined
     ? []
-    : [asset.originalFileName]
+    : [asset.originalFileName];
 }
 
 function stableUnique(value: string, index: number, values: string[]): boolean {
-  return values.indexOf(value) === index
+  return values.indexOf(value) === index;
 }
 
 function sameValues(left: string[], right: string[]): boolean {
-  return left.length === right.length && left.every((value, index) => value === right[index])
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
+  );
 }

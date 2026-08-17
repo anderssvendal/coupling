@@ -1,16 +1,16 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it } from "vitest";
 
 import {
   createNamedManifest,
   representedOutputs,
   serializeManifest,
   type BuildBundle,
-} from "../src/manifest.js"
+} from "../src/manifest.js";
 
 const context = {
   sourceRoot: "/repo/app/assets",
   viteRoot: "/repo",
-}
+};
 
 describe("createNamedManifest", () => {
   it("creates deterministic JS, ordered CSS, and source-relative asset entries", () => {
@@ -58,7 +58,7 @@ describe("createNamedManifest", () => {
         isEntry: false,
         isDynamicEntry: true,
       },
-    }
+    };
 
     expect(createNamedManifest(bundle, context)).toEqual({
       "application.js": "assets/application-A1.js",
@@ -66,8 +66,8 @@ describe("createNamedManifest", () => {
       "images/logo.svg": "assets/logo-D4.svg",
       "branding/logo.svg": "assets/logo-D4.svg",
       "fonts/body.woff2": "assets/body-E5.woff2",
-    })
-  })
+    });
+  });
 
   it("uses scalar CSS values and omits CSS when an entry has none", () => {
     const bundle: BuildBundle = {
@@ -84,14 +84,14 @@ describe("createNamedManifest", () => {
         name: "admin",
         isEntry: true,
       },
-    }
+    };
 
     expect(createNamedManifest(bundle, context)).toEqual({
       "application.js": "assets/application.js",
       "application.css": "assets/application.css",
       "admin.js": "assets/admin.js",
-    })
-  })
+    });
+  });
 
   it("deduplicates identical mappings and rejects conflicts", () => {
     const aliases: BuildBundle = {
@@ -100,10 +100,10 @@ describe("createNamedManifest", () => {
         fileName: "assets/logo.svg",
         originalFileNames: ["app/assets/logo.svg", "app/assets/logo.svg"],
       },
-    }
+    };
     expect(createNamedManifest(aliases, context)).toEqual({
       "logo.svg": "assets/logo.svg",
-    })
+    });
 
     const conflict: BuildBundle = {
       "assets/application.js": {
@@ -117,11 +117,11 @@ describe("createNamedManifest", () => {
         fileName: "assets/source.js",
         originalFileNames: ["app/assets/application.js"],
       },
-    }
+    };
     expect(() => createNamedManifest(conflict, context)).toThrow(
       'conflicting outputs for logical name "application.js"',
-    )
-  })
+    );
+  });
 
   it("exposes the complete represented-output set for bundle completion", () => {
     expect(
@@ -130,13 +130,17 @@ describe("createNamedManifest", () => {
         "application.css": ["assets/reset.css", "assets/application.css"],
       }),
     ).toEqual(
-      new Set(["assets/application.js", "assets/reset.css", "assets/application.css"]),
-    )
-  })
+      new Set([
+        "assets/application.js",
+        "assets/reset.css",
+        "assets/application.css",
+      ]),
+    );
+  });
 
   it("serializes with two spaces and one trailing newline", () => {
-    expect(serializeManifest({ "application.js": "assets/application.js" })).toBe(
-      '{\n  "application.js": "assets/application.js"\n}\n',
-    )
-  })
-})
+    expect(
+      serializeManifest({ "application.js": "assets/application.js" }),
+    ).toBe('{\n  "application.js": "assets/application.js"\n}\n');
+  });
+});

@@ -1,4 +1,4 @@
-import "./shared.css"
-import "./application.css"
+import "./shared.css";
+import "./application.css";
 
-console.log("application")
+console.log("application");

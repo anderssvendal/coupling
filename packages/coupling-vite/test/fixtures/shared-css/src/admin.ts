@@ -1,4 +1,4 @@
-import "./shared.css"
-import "./admin.css"
+import "./shared.css";
+import "./admin.css";
 
-console.log("admin")
+console.log("admin");

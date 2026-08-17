@@ -6,6 +6,15 @@
     "build": "pnpm --recursive build",
     "test": "pnpm --recursive test",
     "typecheck": "pnpm --recursive typecheck",
-    "check": "pnpm build && pnpm typecheck && pnpm test"
+    "lint": "pnpm lint:eslint && pnpm lint:prettier",
+    "lint:eslint": "eslint \"packages/coupling-vite/**/*.ts\"",
+    "lint:prettier": "prettier --check package.json pnpm-workspace.yaml eslint.config.mjs .prettierrc.json \"packages/coupling-vite/**/*.{ts,json}\"",
+    "format": "eslint \"packages/coupling-vite/**/*.ts\" --fix && prettier --write package.json pnpm-workspace.yaml eslint.config.mjs .prettierrc.json \"packages/coupling-vite/**/*.{ts,json}\"",
+    "check": "pnpm build && pnpm typecheck && pnpm lint && pnpm test"
+  },
+  "devDependencies": {
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.67.0"
   }
 }
