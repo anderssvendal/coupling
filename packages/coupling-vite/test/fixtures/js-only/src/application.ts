@@ -1,4 +1,4 @@
-export function greet(name: string): string {
+function greet(name: string): string {
   return `Hello, ${name}!`;
 }
 

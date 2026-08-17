@@ -8,7 +8,8 @@ import couplingDefault, {
   coupling,
   type CouplingOptions,
 } from "../src/index.js";
-import type { CouplingManifest } from "../src/manifest.js";
+
+type CouplingManifest = Record<string, string | string[]>;
 
 const fixturesRoot = path.join(
   path.dirname(fileURLToPath(import.meta.url)),

@@ -6,10 +6,10 @@ import {
   validateOutputPath,
 } from "./paths.js";
 
-export type ManifestValue = string | string[];
-export type CouplingManifest = Record<string, ManifestValue>;
+type ManifestValue = string | string[];
+type CouplingManifest = Record<string, ManifestValue>;
 
-export interface ManifestContext {
+interface ManifestContext {
   sourceRoot: string;
   viteRoot: string;
 }
