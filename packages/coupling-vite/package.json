@@ -19,6 +19,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run",
+    "test:compatibility": "vitest run test/compatibility.test.ts",
     "typecheck": "tsc -p tsconfig.json"
   },
   "engines": {
@@ -34,6 +35,9 @@
     "@types/node": "^22.20.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.6",
+    "vite-5": "npm:vite@5.4.21",
+    "vite-6": "npm:vite@6.4.3",
+    "vite-7": "npm:vite@7.3.6",
     "vitest": "^3.2.7"
   },
   "keywords": [
