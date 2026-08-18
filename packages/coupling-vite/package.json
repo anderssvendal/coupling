@@ -17,8 +17,9 @@
     "README.md"
   ],
   "scripts": {
-    "audit": "pnpm build && node scripts/audit.mjs",
+    "audit": "node scripts/audit.mjs",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepack": "pnpm build",
     "test": "pnpm test:unit && pnpm test:compatibility",
     "test:compatibility": "vitest run test/compatibility.test.ts",
     "test:unit": "vitest run --exclude test/compatibility.test.ts",

@@ -32,7 +32,7 @@ const expectedFiles = [
 
 assertPackageMetadata(packageJson);
 
-const dryRun = JSON.parse(
+const dryRun = parseJsonOutput(
   capture("pnpm", ["pack", "--dry-run", "--json"], packageRoot),
 );
 const packedFiles = dryRun.files
@@ -184,6 +184,15 @@ entries.values.flatten.each do |output|
   Coupling.manifest.find(output)
 end
 `;
+}
+
+function parseJsonOutput(output) {
+  const start = output.indexOf("{");
+  const end = output.lastIndexOf("}");
+  if (start === -1 || end === -1) {
+    throw new Error("Package command did not return JSON");
+  }
+  return JSON.parse(output.slice(start, end + 1));
 }
 
 function capture(command, arguments_, cwd) {

@@ -1,0 +1,58 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# [MISE] description="Audit, build, and publish coupling-vite to npm"
+# [MISE] depends=["package:audit"]
+
+require "digest"
+require "fileutils"
+require "io/console"
+require "json"
+require "open3"
+
+root = ENV.fetch("MISE_PROJECT_ROOT")
+package_root = File.join(root, "packages/coupling-vite")
+build_root = File.join(root, "build")
+package = JSON.parse(File.read(File.join(package_root, "package.json")))
+release = "#{package.fetch("name")}@#{package.fetch("version")}"
+artifact = File.join(build_root, "#{package.fetch("name")}-#{package.fetch("version")}.tgz")
+
+status_output, status = Open3.capture2("git", "status", "--porcelain", chdir: root)
+abort "Refusing to publish from a dirty working tree" unless status.success? && status_output.empty?
+
+identity, identity_status = Open3.capture2e("npm", "whoami", chdir: root)
+abort "npm authentication failed:\n#{identity}" unless identity_status.success?
+
+FileUtils.mkdir_p(build_root)
+FileUtils.rm_f(artifact)
+packed = system(
+  "pnpm", "pack", "--pack-destination", build_root,
+  chdir: package_root
+)
+abort "npm package build failed" unless packed && File.file?(artifact)
+
+puts "Artifact: #{artifact.delete_prefix("#{root}/")}"
+puts "SHA256: #{Digest::SHA256.file(artifact).hexdigest}"
+puts "npm account: #{identity.strip}"
+print "Type #{release} to publish: "
+confirmation = $stdin.gets&.strip
+abort "Publication cancelled" unless confirmation == release
+
+otp = ENV.fetch("NPM_CONFIG_OTP", nil)
+if otp.nil? || otp.empty?
+  abort "An interactive terminal is required to read the npm OTP" unless $stdin.tty?
+
+  print "npm OTP: "
+  otp = $stdin.noecho(&:gets)&.strip
+  puts
+end
+abort "npm OTP must not be empty" if otp.nil? || otp.empty?
+
+published = system(
+  { "NPM_CONFIG_OTP" => otp },
+  "npm", "publish", artifact, "--access", "public",
+  chdir: root
+)
+abort "npm publication failed" unless published
+
+puts "Published #{release}"
