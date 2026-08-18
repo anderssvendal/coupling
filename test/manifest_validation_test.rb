@@ -28,9 +28,7 @@ class ManifestValidationTest < ManifestTestCase
     end
   end
 
-  def test_rejects_empty_and_non_string_logical_names
-    assert_invalid({ "" => "asset.js" }, "logical names")
-
+  def test_rejects_non_string_logical_names
     validator = Coupling::Manifest::Validator.new(@config, ->(name) { name })
     error = assert_raises(Coupling::InvalidManifestError) { validator.validate(1 => "asset.js") }
     assert_includes error.message, "logical names"

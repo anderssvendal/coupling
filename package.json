@@ -1,0 +1,22 @@
+{
+  "name": "coupling-workspace",
+  "private": true,
+  "packageManager": "pnpm@10.29.3",
+  "scripts": {
+    "build": "pnpm --recursive build",
+    "test": "pnpm --recursive test",
+    "typecheck": "pnpm --recursive typecheck",
+    "lint": "pnpm lint:eslint && pnpm lint:prettier",
+    "lint:eslint": "eslint \"packages/coupling-vite/**/*.ts\"",
+    "lint:prettier": "prettier --check package.json pnpm-workspace.yaml eslint.config.mjs .prettierrc.json \"packages/coupling-vite/**/*.{ts,json,mjs,md}\"",
+    "format": "eslint \"packages/coupling-vite/**/*.ts\" --fix && prettier --write package.json pnpm-workspace.yaml eslint.config.mjs .prettierrc.json \"packages/coupling-vite/**/*.{ts,json,mjs,md}\"",
+    "check": "pnpm build && pnpm typecheck && pnpm lint && pnpm test",
+    "package:audit": "pnpm --filter coupling-vite run audit",
+    "test:compatibility": "pnpm --filter coupling-vite test:compatibility"
+  },
+  "devDependencies": {
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript-eslint": "^8.67.0"
+  }
+}

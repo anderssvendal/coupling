@@ -1,0 +1,61 @@
+{
+  "name": "coupling-vite",
+  "version": "0.1.0",
+  "description": "Generate Coupling asset manifests from Vite builds",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE.txt",
+    "README.md"
+  ],
+  "scripts": {
+    "audit": "pnpm build && node scripts/audit.mjs",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "test": "pnpm test:unit && pnpm test:compatibility",
+    "test:compatibility": "vitest run test/compatibility.test.ts",
+    "test:unit": "vitest run --exclude test/compatibility.test.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.6",
+    "vite-5": "npm:vite@5.4.21",
+    "vite-6": "npm:vite@6.4.3",
+    "vite-7": "npm:vite@7.3.6",
+    "vitest": "^3.2.7"
+  },
+  "keywords": [
+    "coupling",
+    "vite",
+    "rails",
+    "assets",
+    "manifest"
+  ],
+  "author": "Anders Svendal <anders.svendal@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anderssvendal/coupling.git",
+    "directory": "packages/coupling-vite"
+  },
+  "homepage": "https://github.com/anderssvendal/coupling#readme",
+  "bugs": "https://github.com/anderssvendal/coupling/issues"
+}

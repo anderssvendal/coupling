@@ -24,18 +24,17 @@ module Coupling
 
       def validate_entry!(validated, name, value)
         validate_name!(name)
-        normalized_name = normalizer.call(name)
-        validate_normalized_name!(validated, name, normalized_name)
+        normalized_name = name.empty? ? name : normalizer.call(name)
+        validate_normalized_name!(validated, name, normalized_name) unless name.empty?
         outputs = normalize_outputs(normalized_name, value)
-        outputs.each { |output| AssetPathValidator.new(config, normalized_name, output).validate }
-        validate_duplicates!(normalized_name, outputs)
+        validate_outputs!(normalized_name, outputs)
         validated[normalized_name] = outputs
       end
 
       def validate_name!(name)
-        return if name.is_a?(String) && !name.empty?
+        return if name.is_a?(String)
 
-        invalid!("logical names must be non-empty strings")
+        invalid!("logical names must be strings")
       end
 
       def validate_normalized_name!(validated, name, normalized_name)
@@ -46,6 +45,12 @@ module Coupling
       end
 
       def normalize_outputs(name, value)
+        if name.empty?
+          return value if valid_outputs?(value)
+
+          invalid!("anonymous entry must map to a non-empty array of non-empty strings")
+        end
+
         outputs = value.is_a?(String) ? [value] : value
         return outputs if valid_outputs?(outputs)
 
@@ -56,6 +61,11 @@ module Coupling
         outputs.is_a?(Array) && !outputs.empty? && outputs.all? do |output|
           output.is_a?(String) && !output.empty?
         end
+      end
+
+      def validate_outputs!(name, outputs)
+        outputs.each { |output| AssetPathValidator.new(config, name, output).validate }
+        validate_duplicates!(name, outputs)
       end
 
       def validate_duplicates!(name, outputs)
