@@ -1,8 +1,11 @@
 ## [Unreleased]
 
-- Accept a reserved empty manifest key for anonymous generated outputs such as shared chunks, lazy chunks, and source maps.
 - Add the pnpm workspace and the ESM `coupling-vite` package for Vite 5 through 7 builds.
 - Integrate package compatibility, type, test, and packed-artifact checks with the local mise workflow.
+
+## [0.1.1] - 2026-08-18
+
+- Accept a reserved empty manifest key for anonymous generated outputs such as shared chunks, lazy chunks, and source maps.
 
 ## [0.1.0] - 2026-08-17
 
