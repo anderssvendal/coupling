@@ -62,10 +62,11 @@ Given configured `application` and `admin` entries, imported CSS and images, cod
   "application.js": "assets/application-A1.js",
   "application.css": ["assets/shared-B2.css", "assets/application-C3.css"],
   "admin.js": "assets/admin-D4.js",
-  "images/logo.svg": "assets/logo-E5.svg",
+  "admin.css": ["assets/shared-B2.css", "assets/admin-E5.css"],
+  "images/logo.svg": "assets/logo-F6.svg",
   "": [
-    "assets/shared-F6.js",
-    "assets/lazy-G7.js",
+    "assets/shared-G7.js",
+    "assets/lazy-H8.js",
     "assets/application-A1.js.map"
   ]
 }
@@ -76,13 +77,13 @@ The manifest is emitted through Vite's bundle lifecycle. Vite's own `build.manif
 ### Named entries
 
 - Each configured, non-dynamic JavaScript entry maps `<entry>.js` to its emitted entry chunk. Shared and lazy chunks are not added to this value.
-- CSS associated with an entry maps `<entry>.css` to one output string or an ordered array of outputs. The key is omitted when the entry has no CSS.
+- CSS required by an entry's static dependency graph maps `<entry>.css` to one output string or a dependency-first ordered array of outputs. Paths are deduplicated within each entry, while shared stylesheets appear under every entry that requires them. The key is omitted when the entry has no static CSS.
 - Imported images, fonts, and other emitted assets beneath `sourceRoot` use their source-relative POSIX path as the logical name.
 - An inlined asset has no output file and is therefore omitted.
 
 ### Anonymous outputs
 
-The reserved empty key (`""`) contains every emitted runtime file not already represented by a named entry. Typical anonymous outputs include shared chunks, dynamic chunks, generated CSS, assets outside `sourceRoot`, and external source maps.
+The reserved empty key (`""`) contains every emitted runtime file not already represented by a named entry. Typical anonymous outputs include shared JavaScript chunks, dynamic chunks and their dynamic-only CSS, generated CSS outside named entries' static graphs, assets outside `sourceRoot`, and external source maps.
 
 The empty key is omitted when there are no anonymous outputs. Application code and Rails helpers should look up named entries only; the anonymous bucket exists so Coupling can validate, package, find, and serve browser-managed files.
 

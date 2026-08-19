@@ -20,6 +20,7 @@ interface BundleChunk {
   name: string;
   isEntry: boolean;
   isDynamicEntry?: boolean;
+  imports?: string[];
   viteMetadata?: unknown;
 }
 
@@ -55,7 +56,15 @@ export function createNamedManifest(
   context: ManifestContext,
 ): CouplingManifest {
   const outputs = Object.values(bundle);
-  const entries = outputs.reduce(addEntryOutput, new NamedEntries());
+  const chunks = new Map(
+    outputs
+      .filter((output): output is BundleChunk => output.type === "chunk")
+      .map((chunk) => [chunk.fileName, chunk]),
+  );
+  const entries = outputs.reduce(
+    (namedEntries, output) => addEntryOutput(namedEntries, output, chunks),
+    new NamedEntries(),
+  );
   const assetAccumulator = outputs.reduce(addAssetOutput, {
     context,
     entries,
@@ -68,6 +77,7 @@ export function createNamedManifest(
 function addEntryOutput(
   entries: NamedEntries,
   output: BuildBundle[string],
+  chunks: ReadonlyMap<string, BundleChunk>,
 ): NamedEntries {
   if (output.type !== "chunk" || !output.isEntry || output.isDynamicEntry) {
     return entries;
@@ -87,7 +97,7 @@ function addEntryOutput(
   const javascriptName = validateLogicalName(`${logicalBase}${extension}`);
   entries.add(javascriptName, [outputPath]);
 
-  const css = importedCss(output).map(validateOutputPath).filter(stableUnique);
+  const css = staticCss(output, chunks);
   if (css.length > 0) {
     entries.add(validateLogicalName(`${logicalBase}.css`), css);
   }
@@ -190,6 +200,34 @@ class NamedEntries {
       ]),
     );
   }
+}
+
+function staticCss(
+  entry: BundleChunk,
+  chunks: ReadonlyMap<string, BundleChunk>,
+): string[] {
+  const visited = new Set<string>();
+  const css: string[] = [];
+
+  const visit = (chunk: BundleChunk): void => {
+    if (visited.has(chunk.fileName)) {
+      return;
+    }
+    visited.add(chunk.fileName);
+
+    // Match Vite's dependency-first cascade order for static imports.
+    for (const importedFileName of chunk.imports ?? []) {
+      const importedChunk = chunks.get(importedFileName);
+      if (importedChunk !== undefined) {
+        visit(importedChunk);
+      }
+    }
+
+    css.push(...importedCss(chunk).map(validateOutputPath));
+  };
+
+  visit(entry);
+  return css.filter(stableUnique);
 }
 
 function importedCss(chunk: BundleChunk): string[] {

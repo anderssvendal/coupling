@@ -93,6 +93,92 @@ describe("createManifest", () => {
       "application.js": "assets/application.js",
     });
   });
+
+  it("shares ordered static dependency CSS between entries and leaves dynamic-only CSS anonymous", () => {
+    const bundle: BuildBundle = {
+      "assets/admin.js": {
+        type: "chunk",
+        fileName: "assets/admin.js",
+        name: "admin",
+        isEntry: true,
+        imports: ["assets/shared.js"],
+        viteMetadata: { importedCss: new Set(["assets/admin.css"]) },
+      },
+      "assets/guide.js": {
+        type: "chunk",
+        fileName: "assets/guide.js",
+        name: "guide",
+        isEntry: true,
+        imports: ["assets/shared.js"],
+        viteMetadata: { importedCss: new Set(["assets/guide.css"]) },
+      },
+      "assets/shared.js": {
+        type: "chunk",
+        fileName: "assets/shared.js",
+        name: "shared",
+        isEntry: false,
+        imports: ["assets/base.js"],
+        viteMetadata: {
+          importedCss: [
+            "assets/shared.css",
+            "assets/base.css",
+            "assets/shared.css",
+          ],
+        },
+      },
+      "assets/base.js": {
+        type: "chunk",
+        fileName: "assets/base.js",
+        name: "base",
+        isEntry: false,
+        viteMetadata: { importedCss: new Set(["assets/base.css"]) },
+      },
+      "assets/lazy.js": {
+        type: "chunk",
+        fileName: "assets/lazy.js",
+        name: "lazy",
+        isEntry: false,
+        isDynamicEntry: true,
+        imports: ["assets/lazy-support.js"],
+        viteMetadata: { importedCss: new Set(["assets/lazy.css"]) },
+      },
+      "assets/lazy-support.js": {
+        type: "chunk",
+        fileName: "assets/lazy-support.js",
+        name: "lazy-support",
+        isEntry: false,
+        viteMetadata: { importedCss: new Set(["assets/lazy-support.css"]) },
+      },
+      ...Object.fromEntries(
+        [
+          "admin.css",
+          "guide.css",
+          "shared.css",
+          "base.css",
+          "lazy.css",
+          "lazy-support.css",
+        ].map((fileName) => [
+          `assets/${fileName}`,
+          { type: "asset" as const, fileName: `assets/${fileName}` },
+        ]),
+      ),
+    };
+
+    expect(createManifest(bundle, context)).toEqual({
+      "admin.js": "assets/admin.js",
+      "admin.css": ["assets/base.css", "assets/shared.css", "assets/admin.css"],
+      "guide.js": "assets/guide.js",
+      "guide.css": ["assets/base.css", "assets/shared.css", "assets/guide.css"],
+      "": [
+        "assets/shared.js",
+        "assets/base.js",
+        "assets/lazy.js",
+        "assets/lazy-support.js",
+        "assets/lazy.css",
+        "assets/lazy-support.css",
+      ],
+    });
+  });
 });
 
 describe("createNamedManifest", () => {

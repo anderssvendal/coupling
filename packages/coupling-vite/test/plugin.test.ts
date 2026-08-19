@@ -73,15 +73,26 @@ describe("coupling plugin", () => {
     );
   });
 
-  it("emits CSS mappings for multiple entries that import shared CSS", async () => {
+  it("includes shared static-chunk CSS in every dependent entry", async () => {
     const result = await fixtureBuild("shared-css", {}, completeInputs);
+    const applicationCss = outputsFor(result.manifest["application.css"]);
+    const adminCss = outputsFor(result.manifest["admin.css"]);
+    const sharedCss = applicationCss[0];
 
     expect(result.manifest["application.js"]).toBe(
       result.entryFile("application"),
     );
     expect(result.manifest["admin.js"]).toBe(result.entryFile("admin"));
-    expect(result.manifest["application.css"]).toBeDefined();
-    expect(result.manifest["admin.css"]).toBeDefined();
+    expect(applicationCss).toHaveLength(2);
+    expect(adminCss).toHaveLength(2);
+    expect(adminCss[0]).toBe(sharedCss);
+    expect(applicationCss[1]).not.toBe(adminCss[1]);
+    expect(new Set(applicationCss).size).toBe(applicationCss.length);
+    expect(new Set(adminCss).size).toBe(adminCss.length);
+    expect(anonymousOutputs(result.manifest)).not.toContain(sharedCss);
+    expect(
+      manifestValues(result.manifest).filter((output) => output === sharedCss),
+    ).toHaveLength(2);
   });
 
   it("covers shared chunks, dynamic chunks, CSS, and outside-root assets", async () => {
@@ -436,6 +447,13 @@ function singleOutput(value: string | string[] | undefined): string {
     throw new Error("Expected one named output");
   }
   return value;
+}
+
+function outputsFor(value: string | string[] | undefined): string[] {
+  if (value === undefined) {
+    throw new Error("Expected a named output");
+  }
+  return typeof value === "string" ? [value] : value;
 }
 
 function anonymousOutputs(manifest: CouplingManifest): string[] {

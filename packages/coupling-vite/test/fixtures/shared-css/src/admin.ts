@@ -1,4 +1,4 @@
-import "./shared.css";
 import "./admin.css";
+import { sharedMessage } from "./shared.js";
 
-console.log("admin");
+console.log(`admin: ${sharedMessage}`);

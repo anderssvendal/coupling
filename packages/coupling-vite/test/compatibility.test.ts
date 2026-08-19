@@ -57,14 +57,24 @@ describe.each(versions)("%s compatibility", (_version, viteBuild) => {
       .filter((output) => output.type === "chunk" && !output.isEntry)
       .map((output) => output.fileName);
     const namedLogo = singleOutput(result.manifest["images/logo.svg"]);
+    const applicationCss = outputsFor(result.manifest["application.css"]);
+    const adminCss = outputsFor(result.manifest["admin.css"]);
+    const sharedCss = applicationCss[0];
     const outsideAsset = result.fileNames.find(
       (fileName) => fileName.endsWith(".svg") && fileName !== namedLogo,
     );
 
     expect(result.manifest["application.js"]).toBeDefined();
     expect(result.manifest["admin.js"]).toBeDefined();
-    expect(result.manifest["application.css"]).toBeDefined();
-    expect(result.manifest["admin.css"]).toBeDefined();
+    expect(applicationCss).toHaveLength(2);
+    expect(adminCss).toHaveLength(2);
+    expect(adminCss[0]).toBe(sharedCss);
+    expect(new Set(applicationCss).size).toBe(applicationCss.length);
+    expect(new Set(adminCss).size).toBe(adminCss.length);
+    expect(anonymous).not.toContain(sharedCss);
+    expect(
+      manifestValues(result.manifest).filter((output) => output === sharedCss),
+    ).toHaveLength(2);
     expect(browserManagedChunks.length).toBeGreaterThan(0);
     expect(anonymous).toEqual(expect.arrayContaining(browserManagedChunks));
     expect(outsideAsset).toBeDefined();
@@ -230,6 +240,13 @@ function singleOutput(value: string | string[] | undefined): string {
     throw new Error("Expected one named output");
   }
   return value;
+}
+
+function outputsFor(value: string | string[] | undefined): string[] {
+  if (value === undefined) {
+    throw new Error("Expected a named output");
+  }
+  return typeof value === "string" ? [value] : value;
 }
 
 function representedRuntimeFiles(result: CompleteBuildResult): Set<string> {
