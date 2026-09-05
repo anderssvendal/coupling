@@ -1,6 +1,6 @@
 # Coupling
 
-Coupling connects assets built by any external tool to Rails and Rack applications through a small JSON manifest.
+Coupling connects assets built by any external tool to Rails, Middleman, and Rack applications through a small JSON manifest.
 
 ## Getting started
 
@@ -20,7 +20,7 @@ Or add it to your `Gemfile`:
 gem "coupling", source: "https://gem.coop/@hjkl"
 ```
 
-#### Configuration
+#### Rails
 
 Create `config/initializers/coupling.rb`:
 
@@ -32,8 +32,6 @@ Coupling.configure do |config|
 end
 ```
 
-#### Rails
-
 Use Coupling's prefixed helpers in your views:
 
 ```erb
@@ -43,6 +41,37 @@ Use Coupling's prefixed helpers in your views:
 ```
 
 Rails automatically serves manifest-listed assets in development.
+
+#### Middleman
+
+Require and activate the extension in `config.rb`:
+
+```ruby
+require "coupling/middleman"
+
+activate :coupling
+```
+
+By default, the extension reads `<project>/tmp/assets/manifest.json`, publishes assets under `/assets`, and serves manifest-listed files from the preview server. Paths and serving can be configured during activation:
+
+```ruby
+activate :coupling,
+         assets_path: "compiled/assets",
+         manifest_path: "compiled/assets/manifest.json",
+         public_path: "/assets",
+         serve: true
+```
+
+Relative filesystem paths are resolved from the Middleman project root. During a static build, Coupling waits until Middleman has finished its normal cleaning and then copies every manifest-listed output into `build/assets`. Anonymous outputs are included, but `manifest.json` and other unlisted files are not copied.
+
+Coupling does not run an asset compiler or package manager. Build assets before Middleman:
+
+```sh
+pnpm build
+bundle exec middleman build
+```
+
+For preview development, run your asset builder in watch mode alongside `middleman server`.
 
 ### Assets
 

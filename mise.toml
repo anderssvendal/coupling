@@ -4,12 +4,13 @@ node = "22.22.0"
 pnpm = "10.29.3"
 
 [tasks.setup]
-description = "Install Ruby, Rails compatibility, example, and frozen pnpm dependencies"
+description = "Install Ruby, framework compatibility, examples, and frozen pnpm dependencies"
 run = """
 bundle install
 bundle exec appraisal generate
 bundle exec appraisal install
 BUNDLE_GEMFILE=examples/rails/Gemfile bundle install
+BUNDLE_GEMFILE=examples/middleman/Gemfile bundle install
 pnpm install --frozen-lockfile
 """
 
@@ -46,6 +47,31 @@ description = "Start the Rails example at http://127.0.0.1:3000"
 dir = "examples/rails"
 run = "bundle exec rails server --binding 127.0.0.1 --port ${PORT:-3000}"
 
+[tasks."middleman:compatibility"]
+description = "Test Middleman 4.5 with Rack 2 and Middleman 4.6 with Rack 3"
+run = """
+bundle exec appraisal middleman-4.5 ruby -Itest test/middleman_extension_test.rb
+bundle exec appraisal middleman-4.6 ruby -Itest test/middleman_extension_test.rb
+"""
+
+[tasks."middleman:test"]
+description = "Build and smoke-test the compiler-free Middleman example"
+dir = "examples/middleman"
+run = """
+bundle exec middleman build
+bundle exec ruby test/smoke_test.rb
+"""
+
+[tasks."middleman:build"]
+description = "Build the Middleman example"
+dir = "examples/middleman"
+run = "bundle exec middleman build"
+
+[tasks."middleman:server"]
+description = "Start the Middleman example at http://127.0.0.1:4567"
+dir = "examples/middleman"
+run = "bundle exec middleman server --bind-address 127.0.0.1 --port ${PORT:-4567}"
+
 [tasks."package:build"]
 description = "Build the coupling-vite package"
 run = "pnpm --filter coupling-vite build"
@@ -71,8 +97,8 @@ description = "Audit and smoke-test the packed coupling-vite package"
 run = "pnpm --filter coupling-vite run audit"
 
 [tasks.verify]
-description = "Run package, Ruby, Rails compatibility, and Rails example checks"
-depends = ["package:check", "check", "rails:compatibility", "rails:test"]
+description = "Run package, Ruby, framework compatibility, and example checks"
+depends = ["package:check", "check", "rails:compatibility", "rails:test", "middleman:compatibility", "middleman:test"]
 
 [tasks.console]
 description = "Start an interactive Coupling console"

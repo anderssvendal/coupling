@@ -3,6 +3,8 @@
 - Add the pnpm workspace and the ESM `coupling-vite` package for Vite 5 through 7 builds.
 - Integrate package compatibility, type, test, and packed-artifact checks with the local mise workflow.
 - Include CSS from shared static chunks in every named Vite entry that depends on it.
+- Add Middleman 4.5 and 4.6 support for helpers, preview serving, and post-clean static asset copying.
+- Share compiler-free asset fixtures between the Rails and Middleman examples.
 
 ## [0.1.1] - 2026-08-18
 
