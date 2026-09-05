@@ -1,16 +1,19 @@
 ---
-title: Welcome to Middleman
+title: Coupling Middleman example
 ---
 
-<%= coupled_image_tag('images/coupling.png') %>
-<h1>
-  Middleman is Running
-</h1>
+<main>
+  <%= coupled_image_tag("images/logo.svg", alt: "Coupling logo", width: 120, height: 120) %>
 
-<%= coupled_assets %>
+  <h1>Coupling Middleman example</h1>
+  <p>This page uses checked-in compiled assets without an asset bundler.</p>
 
-<%= link_to(
-  "Read Documentation",
-  "https://middlemanapp.com/basics/templating_language/",
-  target: "_blank"
-) %>
+  <h2>Ordered JavaScript outputs</h2>
+  <ol>
+    <% coupled_asset_paths("application.js").each do |path| %>
+      <li><code><%= path %></code></li>
+    <% end %>
+  </ol>
+
+  <p>Logo URL: <code><%= coupled_asset_path("images/logo.svg") %></code></p>
+</main>

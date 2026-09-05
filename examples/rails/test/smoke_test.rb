@@ -7,7 +7,7 @@ require_relative "../config/environment"
 
 class CouplingRailsExampleSmokeTest < Minitest::Test
   ROOT = Pathname(__dir__).join("..").expand_path
-  ASSETS_PATH = ROOT.join("coupled_assets")
+  ASSETS_PATH = ROOT.join("../assets").expand_path
   MANIFEST = JSON.parse(ASSETS_PATH.join("manifest.json").read)
   OUTPUTS = MANIFEST.values.flatten.freeze
 

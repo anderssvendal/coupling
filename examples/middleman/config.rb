@@ -1,7 +1,7 @@
-require 'coupling/middleman'
+# frozen_string_literal: true
 
-activate :coupling do |config|
-end
+require "coupling/middleman"
 
-# Make sure Middleman does not try to compile anything in assets/
-ignore 'assets/**'
+activate :coupling,
+         assets_path: File.expand_path("../assets", root),
+         public_path: "/assets"
