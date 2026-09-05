@@ -17,6 +17,7 @@ class RackAppAnonymousOutputsTest < RackAppTestCase
 
     assert_equal [200, 200, 404], [chunk.status, map.status, unlisted.status]
     assert_includes ["application/javascript", "text/javascript"], chunk["content-type"]
-    assert_equal "application/octet-stream", map["content-type"]
+    expected_map_type = Rack::Mime.mime_type(".map", "application/octet-stream")
+    assert_equal expected_map_type, map["content-type"]
   end
 end

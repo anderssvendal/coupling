@@ -1,98 +1,112 @@
-require 'fileutils'
+# frozen_string_literal: true
 
-require 'coupling/helper'
-require 'coupling/middleman/middleware'
+require "fileutils"
+require "pathname"
+require "coupling/helper"
+require "coupling/rack/app"
 
-module Coupling::Middleman
-  class Extension < ::Middleman::Extension
-    option :root
+module Coupling
+  module Middleman
+    class Extension < ::Middleman::Extension
+      option :assets_path, nil, "Directory containing compiled assets and manifest.json"
+      option :manifest_path, nil, "Path to the Coupling manifest"
+      option :public_path, nil, "URL path where compiled assets are published"
+      option :serve, nil, "Serve compiled assets from the Middleman preview server"
 
-    def build_command
-      'yarn build'
-    end
+      helpers Coupling::Helper
 
-    def initialize(app, options_hash={}, &block)
-      super
-
-      Coupling.configure do |config|
-        config.root = options[:root].presence || app.root_path.join('tmp', 'assets')
-        config.public_path = options[:public_path] || '/assets'
+      def after_configuration
+        configure_coupling
+        mount_asset_server if Coupling.config.serve?
       end
 
-      app.use(Coupling::Middleman::Middleware)
-    end
+      def after_build(builder)
+        copy_assets(builder)
+      end
 
-    helpers do
-      include Coupling::Helper
-    end
+      private
 
-    def before_build(builder)
-      build_assets(builder)
-    end
+      def configure_coupling
+        config = Coupling.config
+        config.apply_middleman_defaults(root: app.root_path, server: app.server?)
+        assign_path_option(config, :assets_path)
+        assign_path_option(config, :manifest_path)
+        assign_option(config, :public_path)
+        assign_option(config, :serve)
+      end
 
-    def after_build(builder)
-      ensure_assets_dir(builder)
-      copy_assets(builder)
-    end
+      def assign_path_option(config, name)
+        value = options[name]
+        config.public_send("#{name}=", expand_from_root(value)) if value
+      end
 
-    private
+      def assign_option(config, name)
+        value = options[name]
+        config.public_send("#{name}=", value) unless value.nil?
+      end
 
-    def build_assets(builder)
-      Open3.popen3(build_command) do |stdin, stdout, stderr, waie_thread|
-        stdout_thread = Thread.new do
-          stdout.each_line do |line|
-            builder.thor.say_status(:coupling, line.strip)
-          end
+      def expand_from_root(path)
+        path = Pathname.new(path.to_s)
+        path.absolute? ? path : app.root_path.join(path).expand_path
+      end
+
+      def mount_asset_server
+        if Coupling.config.public_path == "/"
+          raise ArgumentError, "Middleman asset serving requires a public_path other than /"
         end
 
-        stderr_thread = Thread.new do
-          stderr.each_line do |line|
-            builder.thor.say_status(:coupling, line.strip)
-          end
+        asset_app = Coupling::Rack::App.new
+        app.map(Coupling.config.public_path) { run asset_app }
+      end
+
+      def copy_assets(builder)
+        build_root = File.expand_path(app.config[:build_dir], app.root)
+        destination_root = build_destination(build_root)
+        prepare_directory(destination_root, build_root)
+
+        Coupling.manifest.assets.uniq(&:path).each do |asset|
+          copy_asset(asset, destination_root, build_root, builder)
         end
-
-        stdout_thread.join
-        stderr_thread.join
-
-        # if wait_thread.value.success?
-        #   puts "Success!"
-        # else
-        #   puts "Error!"
-        # end
       end
-    end
 
-    def ensure_assets_dir(builder)
-      if Dir.exist?(build_dir_path)
-        builder.thor.say_status(:exists, build_dir, :blue)
-      else
-        builder.thor.say_status(:create, build_dir, :green)
-        FileUtils.mkdir_p(build_dir_path)
+      def build_destination(build_root)
+        relative_public_path = Coupling.config.public_path.delete_prefix("/")
+        destination = File.expand_path(relative_public_path, build_root)
+        validate_containment!(destination, build_root)
+        destination
       end
-    end
 
-    def copy_assets(builder)
-      Coupling.manifest.assets.each do |asset|
-        src = asset.absolute_path
-        dst = File.join(build_dir_path, asset.path)
-        build_path = File.join(build_dir, asset.path)
+      def copy_asset(asset, destination_root, build_root, builder)
+        source = asset.absolute_path
+        raise Errno::ENOENT, "Manifest-listed asset not found: #{source}" unless source.file?
 
-        if File.exist?(dst)
-          builder.thor.say_status(:exists, build_path, :blue)
+        destination = File.expand_path(asset.path, destination_root)
+        validate_containment!(destination, destination_root)
+        prepare_directory(File.dirname(destination), build_root)
+        FileUtils.cp(source, destination)
+        report_copy(builder, destination)
+      end
+
+      def prepare_directory(directory, build_root)
+        FileUtils.mkdir_p(directory)
+        validate_containment!(File.realpath(directory), File.realpath(build_root))
+      end
+
+      def validate_containment!(candidate, root)
+        boundary = "#{root.delete_suffix(File::SEPARATOR)}#{File::SEPARATOR}"
+        return if candidate == root || candidate.start_with?(boundary)
+
+        raise ArgumentError, "Coupling build destination escapes build_dir: #{candidate}"
+      end
+
+      def report_copy(builder, destination)
+        path = Pathname.new(destination).relative_path_from(app.root_path)
+        if builder.thor
+          builder.thor.say_status(:copy_asset, path, :green)
         else
-          builder.thor.say_status(:copy_asset, build_path, :green)
-          FileUtils.mkdir_p(File.dirname(dst)) unless Dir.exist?(File.dirname(dst))
-          FileUtils.cp(src, dst)
+          logger.info "Coupling copied #{path}"
         end
       end
-    end
-
-    def build_dir
-      File.join(app.config[:build_dir], Coupling.config.public_path)
-    end
-
-    def build_dir_path
-      File.join(Dir.pwd, build_dir)
     end
   end
 end

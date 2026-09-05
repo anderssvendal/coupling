@@ -1,9 +1,13 @@
-require 'coupling/middleman/extension'
-require 'coupling/middleman/middleware'
+# frozen_string_literal: true
+
+require "coupling"
+require "middleman-core"
 
 module Coupling
   module Middleman
   end
 end
 
-::Middleman::Extensions.register(:coupling, Coupling::Middleman::Extension)
+require "coupling/middleman/extension"
+
+Middleman::Extensions.register(:coupling, Coupling::Middleman::Extension)

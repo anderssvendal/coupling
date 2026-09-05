@@ -5,8 +5,6 @@ AllCops:
   Exclude:
     - "examples/**/*"
     - "gemfiles/**/*"
-    - "lib/coupling/middleman.rb"
-    - "lib/coupling/middleman/**/*"
 
 Style/StringLiterals:
   Enabled: true

@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors = ["Anders Svendal"]
   spec.email = ["anders.svendal@gmail.com"]
 
-  spec.summary = "Connect external asset builds to Rails and Rack"
+  spec.summary = "Connect external asset builds to Rails, Middleman, and Rack"
   spec.description = "Coupling maps logical asset names to compiled files through a small JSON manifest."
   spec.homepage = "https://github.com/anderssvendal/coupling"
   spec.license = "MIT"
@@ -21,7 +21,6 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rack", ">= 2.2"
 
-  runtime_files = Dir["lib/**/*.rb"].reject { |file| file.start_with?("lib/coupling/middleman") }
-  spec.files = (runtime_files + %w[CHANGELOG.md LICENSE.txt README.md]).sort
+  spec.files = (Dir["lib/**/*.rb"] + %w[CHANGELOG.md LICENSE.txt README.md]).sort
   spec.require_paths = ["lib"]
 end

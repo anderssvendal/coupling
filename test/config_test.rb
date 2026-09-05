@@ -90,4 +90,26 @@ class ConfigTest < Minitest::Test
     assert_equal Pathname.new("/custom/metadata.json"), config.manifest_path
     refute config.serve?
   end
+
+  def test_middleman_defaults_use_the_application_root_and_server_mode
+    config = Coupling::Config.new
+
+    config.apply_middleman_defaults(root: "/site", server: true)
+
+    assert_equal Pathname.new("/site/tmp/assets"), config.assets_path
+    assert config.serve?
+    refute config.assets_path_configured?
+    refute config.serve_configured?
+  end
+
+  def test_middleman_defaults_preserve_explicit_path_and_serve_settings
+    config = Coupling::Config.new
+    config.assets_path = "/custom/assets"
+    config.serve = false
+
+    config.apply_middleman_defaults(root: "/site", server: true)
+
+    assert_equal Pathname.new("/custom/assets"), config.assets_path
+    refute config.serve?
+  end
 end

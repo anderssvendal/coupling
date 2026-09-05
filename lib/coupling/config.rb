@@ -63,11 +63,19 @@ module Coupling
     end
 
     def apply_rails_defaults(root:, development:)
-      @assets_path = coerce_path(root).join("tmp/assets") unless assets_path_configured?
-      @serve = development unless serve_configured?
+      apply_application_defaults(root: root, serve: development)
+    end
+
+    def apply_middleman_defaults(root:, server:)
+      apply_application_defaults(root: root, serve: server)
     end
 
     private
+
+    def apply_application_defaults(root:, serve:)
+      @assets_path = coerce_path(root).join("tmp/assets") unless assets_path_configured?
+      @serve = serve unless serve_configured?
+    end
 
     def coerce_path(value)
       value = value.to_path if value.respond_to?(:to_path)

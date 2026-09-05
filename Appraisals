@@ -15,3 +15,11 @@ end
 appraise "rails-8" do
   gem "rails", ">= 8.0", "< 9.0"
 end
+
+appraise "middleman-4.5" do
+  gem "middleman", "~> 4.5.0"
+end
+
+appraise "middleman-4.6" do
+  gem "middleman", "~> 4.6.0"
+end

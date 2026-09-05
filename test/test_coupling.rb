@@ -36,6 +36,13 @@ class TestCoupling < Minitest::Test
     Coupling.reset!
   end
 
+  def test_gem_includes_the_optional_middleman_integration
+    gemspec = Gem::Specification.load(File.expand_path("../coupling.gemspec", __dir__))
+
+    assert_includes gemspec.files, "lib/coupling/middleman.rb"
+    assert_includes gemspec.files, "lib/coupling/middleman/extension.rb"
+  end
+
   def test_plain_ruby_require_does_not_load_rails_or_active_support
     lib_path = File.expand_path("../lib", __dir__)
     script = <<~RUBY
